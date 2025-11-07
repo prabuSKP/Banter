@@ -1,0 +1,355 @@
+version: "1.0"
+name: "banter-subagents"
+description: "Specialized subagents for Banter social voice/video chat application"
+
+# Master Orchestrator Agent
+orchestrator:
+  name: "banter-master-orchestrator"
+  description: "Coordinates all development tasks for Banter social networking app"
+  capabilities:
+    - Project management and task coordination
+    - Code review and quality assurance
+    - Architecture decisions and technical guidance
+    - Integration management between frontend/backend
+    - Deployment and CI/CD coordination
+  tools: ["*"]  # Has access to all tools
+  context_sources:
+    - "REQUIREMENTS.md"
+    - "PROJECT_SUMMARY.md"
+    - "DEVELOPMENT_STATUS.md"
+    - "backend/README.md"
+    - "mobile/README.md"
+
+# Specialized Subagents
+subagents:
+
+  # Backend Development Agent
+  - name: "backend-developer"
+    description: "Node.js/Express backend development specialist"
+    capabilities:
+      - API endpoint development (Express.js)
+      - Database operations (Prisma ORM)
+      - Authentication & authorization (Firebase + JWT)
+      - Real-time features (Socket.IO)
+      - Third-party service integration (Agora, Razorpay, Azure)
+      - Unit and integration testing (Jest)
+    tools:
+      - "Read"
+      - "Write"
+      - "Edit"
+      - "Bash"
+      - "Grep"
+      - "Glob"
+    primary_files:
+      - "backend/src/**/*.ts"
+      - "backend/prisma/schema.prisma"
+      - "backend/tests/**/*.ts"
+      - "backend/package.json"
+    context_sources:
+      - "REQUIREMENTS.md#Technical Architecture"
+      - "backend/README.md"
+
+  # Mobile Development Agent
+  - name: "mobile-developer"
+    description: "React Native/Expo mobile app development specialist"
+    capabilities:
+      - React Native component development
+      - Expo Router navigation
+      - Firebase Authentication integration
+      - Agora RTC integration
+      - State management (Zustand)
+      - UI/UX implementation (React Native Paper)
+      - Mobile testing and debugging
+    tools:
+      - "Read"
+      - "Write"
+      - "Edit"
+      - "Bash"
+      - "Grep"
+      - "Glob"
+    primary_files:
+      - "mobile/app/**/*.tsx"
+      - "mobile/src/**/*.{ts,tsx}"
+      - "mobile/package.json"
+    context_sources:
+      - "REQUIREMENTS.md#Mobile Development"
+      - "mobile/README.md"
+
+  # Database Specialist Agent
+  - name: "database-specialist"
+    description: "PostgreSQL and Prisma database specialist"
+    capabilities:
+      - Database schema design and optimization
+      - Prisma schema development
+      - Database migrations and seeding
+      - Query optimization and indexing
+      - Database backup and recovery strategies
+    tools:
+      - "Read"
+      - "Write"
+      - "Edit"
+      - "Bash"
+    primary_files:
+      - "backend/prisma/schema.prisma"
+      - "backend/prisma/migrations/**/*"
+      - "backend/prisma/seed.ts"
+    context_sources:
+      - "REQUIREMENTS.md#Database Schema"
+
+  # Real-time Communications Agent
+  - name: "rtc-specialist"
+    description: "Agora.io and Socket.IO real-time communication specialist"
+    capabilities:
+      - Agora voice/video call implementation
+      - Socket.IO real-time messaging
+      - WebRTC optimization
+      - Call quality monitoring
+      - Real-time event handling
+    tools:
+      - "Read"
+      - "Write"
+      - "Edit"
+      - "Bash"
+      - "Grep"
+    primary_files:
+      - "backend/src/services/agora.service.ts"
+      - "backend/src/socket/**/*.ts"
+      - "backend/src/controllers/call.controller.ts"
+      - "mobile/hooks/useAgora.ts"
+    context_sources:
+      - "REQUIREMENTS.md#Agora.io Setup"
+
+  # Authentication & Security Agent
+  - name: "auth-security-specialist"
+    description: "Firebase Authentication and security implementation specialist"
+    capabilities:
+      - Firebase Authentication integration
+      - JWT token management
+      - Security best practices
+      - Rate limiting and DDoS protection
+      - User privacy and data protection
+    tools:
+      - "Read"
+      - "Write"
+      - "Edit"
+      - "Bash"
+      - "Grep"
+    primary_files:
+      - "backend/src/config/firebase.ts"
+      - "backend/src/services/auth.service.ts"
+      - "backend/src/controllers/auth.controller.ts"
+      - "backend/src/middleware/auth.ts"
+      - "mobile/services/firebase.ts"
+    context_sources:
+      - "REQUIREMENTS.md#Firebase Authentication Setup"
+
+  # Payment Integration Agent
+  - name: "payment-specialist"
+    description: "Razorpay payment gateway and e-commerce specialist"
+    capabilities:
+      - Razorpay payment integration
+      - Subscription management
+      - Transaction security
+      - Payment webhook handling
+      - Coin/credit system implementation
+    tools:
+      - "Read"
+      - "Write"
+      - "Edit"
+      - "Bash"
+      - "Grep"
+    primary_files:
+      - "backend/src/services/payment.service.ts"
+      - "backend/src/controllers/payment.controller.ts"
+      - "backend/src/controllers/wallet.controller.ts"
+      - "mobile/hooks/usePayment.ts"
+    context_sources:
+      - "REQUIREMENTS.md#Razorpay Setup"
+
+  # Cloud Infrastructure Agent
+  - name: "infrastructure-specialist"
+    description: "Azure cloud services and deployment specialist"
+    capabilities:
+      - Azure App Service deployment
+      - Azure PostgreSQL and Redis configuration
+      - Azure Blob Storage management
+      - Environment variable management
+      - CI/CD pipeline setup
+      - Monitoring and logging setup
+    tools:
+      - "Read"
+      - "Write"
+      - "Edit"
+      - "Bash"
+    primary_files:
+      - ".github/workflows/**/*"
+      - "Dockerfile"
+      - "azure-pipelines.yml"
+      - "backend/.env.example"
+    context_sources:
+      - "REQUIREMENTS.md#Azure Services Configuration"
+
+  # UI/UX Design Agent
+  - name: "ui-ux-designer"
+    description: "React Native UI/UX design and implementation specialist"
+    capabilities:
+      - Component library design (React Native Paper)
+      - Mobile UI/UX best practices
+      - Responsive design for different screen sizes
+      - Accessibility implementation
+      - User flow optimization
+      - Design system creation
+    tools:
+      - "Read"
+      - "Write"
+      - "Edit"
+      - "Glob"
+    primary_files:
+      - "mobile/components/**/*.tsx"
+      - "mobile/app/**/*screens*.tsx"
+      - "mobile/src/constants/theme.ts"
+    context_sources:
+      - "REQUIREMENTS.md#Component Specifications"
+
+  # Testing & QA Agent
+  - name: "testing-qa-specialist"
+    description: "Comprehensive testing and quality assurance specialist"
+    capabilities:
+      - Unit testing (Jest)
+      - Integration testing (Supertest)
+      - Mobile testing (React Native Testing Library)
+      - End-to-end testing
+      - Performance testing
+      - Bug tracking and resolution
+    tools:
+      - "Read"
+      - "Write"
+      - "Edit"
+      - "Bash"
+      - "Grep"
+    primary_files:
+      - "backend/tests/**/*.ts"
+      - "mobile/tests/**/*.{ts,tsx}"
+      - "backend/jest.config.js"
+      - "mobile/jest.config.js"
+    context_sources:
+      - "REQUIREMENTS.md#Testing Strategy"
+      - "TESTING_GUIDE.md"
+
+  # API Documentation Agent
+  - name: "api-documentation-specialist"
+    description: "API documentation and technical writing specialist"
+    capabilities:
+      - API endpoint documentation
+      - Code documentation
+      - README files maintenance
+      - Developer guides creation
+      - Architecture diagram creation
+    tools:
+      - "Read"
+      - "Write"
+      - "Edit"
+      - "Glob"
+    primary_files:
+      - "**/*.md"
+      - "backend/src/**/*.ts" # For JSDoc comments
+    context_sources:
+      - "All project documentation files"
+
+# Workflows for common tasks
+workflows:
+
+  - name: "feature-development"
+    description: "Complete feature development workflow"
+    steps:
+      1. "orchestrator: Analyze requirements and create task breakdown"
+      2. "backend-developer: Implement backend API endpoints"
+      3. "mobile-developer: Implement mobile UI components"
+      4. "database-specialist: Update database schema if needed"
+      5. "testing-qa-specialist: Write and run tests"
+      6. "api-documentation-specialist: Update documentation"
+      7. "orchestrator: Review and merge changes"
+
+  - name: "bug-fixing"
+    description: "Bug identification and fixing workflow"
+    steps:
+      1. "orchestrator: Analyze bug report and identify affected components"
+      2. "testing-qa-specialist: Reproduce the bug with tests"
+      3. "[relevant-specialist]: Fix the bug"
+      4. "testing-qa-specialist: Verify fix with tests"
+      5. "api-documentation-specialist: Update changelog"
+      6. "orchestrator: Review and deploy fix"
+
+  - name: "security-audit"
+    description: "Security audit and enhancement workflow"
+    steps:
+      1. "auth-security-specialist: Conduct security audit"
+      2. "backend-developer: Implement security patches"
+      3. "mobile-developer: Update mobile security measures"
+      4. "testing-qa-specialist: Test security implementations"
+      5. "orchestrator: Review security improvements"
+
+  - name: "deployment-preparation"
+    description: "Deploy application to production"
+    steps:
+      1. "infrastructure-specialist: Prepare deployment environment"
+      2. "testing-qa-specialist: Run full test suite"
+      3. "backend-developer: Build production backend"
+      4. "mobile-developer: Build production mobile"
+      5. "orchestrator: Coordinate deployment"
+      6. "infrastructure-specialist: Monitor deployment health"
+
+# Context Sharing Rules
+context_sharing:
+  global_context:
+    - "Project requirements and architecture"
+    - "Database schema understanding"
+    - "API endpoint contracts"
+    - "Authentication flow"
+    - "Real-time communication protocols"
+
+  specialized_context:
+    "backend-developer": ["Backend architecture", "Database operations", "API contracts"]
+    "mobile-developer": ["Mobile UI patterns", "Navigation flows", "State management"]
+    "database-specialist": ["Schema design", "Query optimization", "Data relationships"]
+    "rtc-specialist": ["Agora SDK", "Socket.IO events", "Call protocols"]
+    "auth-security-specialist": ["Firebase integration", "JWT flows", "Security patterns"]
+    "payment-specialist": ["Razorpay integration", "Transaction flows", "Webhook handling"]
+    "infrastructure-specialist": ["Azure services", "Deployment pipelines", "Environment config"]
+    "ui-ux-designer": ["Design system", "User flows", "Accessibility guidelines"]
+    "testing-qa-specialist": ["Test frameworks", "QA methodologies", "Performance metrics"]
+    "api-documentation-specialist": ["Documentation standards", "API specifications", "Developer guides"]
+
+# Agent Communication Protocols
+communication:
+  handoff_protocol:
+    - "Provide context about current task state"
+    - "Share relevant files and changes made"
+    - "Identify any blockers or dependencies"
+    - "Confirm next steps and expectations"
+
+  collaboration_protocol:
+    - "Share implementation plans before starting"
+    - "Provide regular progress updates"
+    - "Notify about breaking changes or conflicts"
+    - "Coordinate on shared resource modifications"
+
+# Performance Metrics
+metrics:
+  code_quality:
+    - "TypeScript compliance"
+    - "Test coverage percentage"
+    - "Code review completion rate"
+    - "Documentation completeness"
+
+  development_velocity:
+    - "Tasks completed per sprint"
+    - "Bug fix turnaround time"
+    - "Feature completion time"
+    - "Deployment frequency"
+
+  system_health:
+    - "API response times"
+    - "Mobile app performance"
+    - "Database query performance"
+    - "Real-time communication quality"
