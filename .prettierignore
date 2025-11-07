@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+package-lock.json
+
+# Build outputs
+dist
+build
+.expo
+*.tsbuildinfo
+
+# Coverage
+coverage
+
+# Logs
+logs
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+prisma/migrations
+
+# Generated files
+backend/dist
+mobile/.expo

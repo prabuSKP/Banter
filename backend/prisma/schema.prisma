@@ -1,0 +1,399 @@
+// backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USER MANAGEMENT ====================
+
+model User {
+  id            String    @id @default(uuid())
+  phoneNumber   String    @unique
+  countryCode   String    @default("+91") // India default
+  firebaseUid   String?   @unique // Firebase UID
+  email         String?   @unique
+  username      String?   @unique
+  fullName      String
+  avatar        String?
+  bio           String?
+  gender        String?   // male, female, other, prefer_not_to_say
+  dateOfBirth   DateTime?
+  language      String    @default("en")
+  isVerified    Boolean   @default(false)
+  isOnline      Boolean   @default(false)
+  lastSeen      DateTime?
+  coins         Int       @default(100)
+  isPremium     Boolean   @default(false)
+  premiumUntil  DateTime?
+  fcmToken      String?   // For push notifications
+  role          String    @default("user") // user, admin, moderator
+  isActive      Boolean   @default(true)   // For soft delete / suspension
+
+  // Host/Creator Verification
+  isHost                Boolean   @default(false)   // Verified host status
+  hostVerificationStatus String?  // pending, approved, rejected, null
+  hostAppliedAt         DateTime? // When user applied to become host
+  hostVerifiedAt        DateTime? // When user was verified as host
+  hostRejectedAt        DateTime? // When application was rejected
+  hostRejectionReason   String?   // Reason for rejection
+  hostDocuments         String[]  @default([]) // URLs of verification documents
+  hostRating            Float?    @default(0)   // Average rating as host
+  totalEarnings         Float     @default(0)   // Total earnings in INR
+  availableBalance      Float     @default(0)   // Withdrawable balance
+  totalWithdrawn        Float     @default(0)   // Total amount withdrawn
+  totalCallsAsHost      Int       @default(0)   // Total calls received as host
+  totalMinutesAsHost    Int       @default(0)   // Total minutes as host
+
+  // Preferences stored as JSON
+  interests     String[]  // ["sports", "music", "gaming"]
+  lookingFor    String[]  // ["friendship", "chat", "advice"]
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  sentRequests      FriendRequest[] @relation("SentRequests")
+  receivedRequests  FriendRequest[] @relation("ReceivedRequests")
+  friends           Friendship[]    @relation("UserFriends")
+  friendOf          Friendship[]    @relation("FriendOf")
+  sentMessages      Message[]       @relation("SentMessages")
+  receivedMessages  Message[]       @relation("ReceivedMessages")
+  callsMade         CallLog[]       @relation("CallsMade")
+  callsReceived     CallLog[]       @relation("CallsReceived")
+  chatRoomMembers   ChatRoomMember[]
+  hostedRooms       ChatRoom[]      @relation("RoomHost")
+  reports           Report[]        @relation("Reporter")
+  reportedBy        Report[]        @relation("ReportedUser")
+  blockedUsers      BlockedUser[]   @relation("BlockedBy")
+  blockedBy         BlockedUser[]   @relation("BlockedUser")
+  notifications     Notification[]
+  transactions      Transaction[]
+  subscriptions     Subscription[]
+  withdrawals       Withdrawal[]
+
+  @@index([phoneNumber])
+  @@index([firebaseUid])
+  @@index([username])
+  @@index([isOnline])
+}
+
+// ==================== FRIENDSHIP SYSTEM ====================
+
+model FriendRequest {
+  id          String   @id @default(uuid())
+  senderId    String
+  receiverId  String
+  status      String   @default("pending") // pending, accepted, rejected
+  message     String?  // Optional message with request
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sender      User     @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, status])
+}
+
+model Friendship {
+  id          String   @id @default(uuid())
+  userId      String
+  friendId    String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
+  friend      User     @relation("FriendOf", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
+}
+
+// ==================== CHAT ROOMS ====================
+
+model ChatRoom {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  coverImage  String?
+  roomType    String   @default("voice") // voice, video, text
+  category    String?  // relationships, career, casual, gaming, music
+  language    String   @default("en")
+  maxMembers  Int      @default(10)
+  isActive    Boolean  @default(true)
+  isPublic    Boolean  @default(true)
+  hostId      String
+  agoraChannel String? @unique // Agora channel name
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  host        User     @relation("RoomHost", fields: [hostId], references: [id])
+  members     ChatRoomMember[]
+  messages    Message[]
+
+  @@index([isActive, isPublic])
+  @@index([category, language])
+  @@index([agoraChannel])
+}
+
+model ChatRoomMember {
+  id          String   @id @default(uuid())
+  userId      String
+  roomId      String
+  role        String   @default("member") // member, moderator, host
+  isMuted     Boolean  @default(false)
+  isSpeaking  Boolean  @default(false)
+  agoraUid    Int?     // Agora UID for this user in this room
+  joinedAt    DateTime @default(now())
+  leftAt      DateTime?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room        ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roomId])
+  @@index([roomId])
+}
+
+// ==================== MESSAGING ====================
+
+model Message {
+  id          String   @id @default(uuid())
+  senderId    String
+  receiverId  String?  // For direct messages
+  roomId      String?  // For room messages
+  content     String   @db.Text
+  messageType String   @default("text") // text, image, audio, video, gif
+  mediaUrl    String?
+  isRead      Boolean  @default(false)
+  isEdited    Boolean  @default(false)
+  isDeleted   Boolean  @default(false)
+  replyToId   String?  // For message replies
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User?    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  room        ChatRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  replyTo     Message? @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies     Message[] @relation("MessageReplies")
+
+  @@index([senderId, receiverId])
+  @@index([roomId, createdAt])
+  @@index([receiverId, isRead])
+}
+
+// ==================== VOICE/VIDEO CALLS ====================
+
+model CallLog {
+  id            String   @id @default(uuid())
+  callerId      String
+  receiverId    String
+  callType      String   // audio, video
+  duration      Int?     // in seconds
+  status        String   // initiated, ringing, answered, completed, missed, rejected, failed
+  agoraChannel  String?  // Agora channel name
+  coinsCharged  Int?     // Coins charged for this call
+  startedAt     DateTime @default(now())
+  answeredAt    DateTime?
+  endedAt       DateTime?
+
+  caller        User     @relation("CallsMade", fields: [callerId], references: [id], onDelete: Cascade)
+  receiver      User     @relation("CallsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([callerId])
+  @@index([receiverId])
+  @@index([startedAt])
+  @@index([agoraChannel])
+}
+
+// ==================== PAYMENT & TRANSACTIONS ====================
+
+model Transaction {
+  id                String   @id @default(uuid())
+  userId            String
+  type              String   // purchase, bonus, refund, debit, admin
+  amount            Int      // in paisa (₹100 = 10000 paisa)
+  currency          String   @default("INR")
+  coins             Int?     // Coins added/deducted (positive for credit, negative for debit)
+  status            String   // pending, completed, failed
+  description       String?  // Transaction description
+  metadata          Json?    // Additional data as JSON
+  razorpayOrderId   String?  @unique
+  razorpayPaymentId String?  @unique
+  razorpaySignature String?
+  paymentMethod     String?  // upi, card, netbanking, wallet
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([razorpayOrderId])
+  @@index([razorpayPaymentId])
+}
+
+model Subscription {
+  id                  String   @id @default(uuid())
+  userId              String
+  plan                String   // basic, premium, pro
+  status              String   // active, cancelled, expired
+  amount              Int      // Monthly amount in paisa
+  razorpaySubId       String?  @unique
+  currentPeriodStart  DateTime
+  currentPeriodEnd    DateTime
+  cancelledAt         DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+// ==================== SAFETY & MODERATION ====================
+
+model BlockedUser {
+  id            String   @id @default(uuid())
+  userId        String
+  blockedUserId String
+  reason        String?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation("BlockedBy", fields: [userId], references: [id], onDelete: Cascade)
+  blockedUser   User     @relation("BlockedUser", fields: [blockedUserId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blockedUserId])
+  @@index([userId])
+}
+
+model Report {
+  id              String   @id @default(uuid())
+  reporterId      String
+  reportedUserId  String
+  reportType      String   // user, message, room
+  reason          String   // harassment, spam, inappropriate, fake
+  description     String?  @db.Text
+  status          String   @default("pending") // pending, reviewed, action_taken, dismissed
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime @default(now())
+
+  reporter        User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser    User     @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+
+  @@index([reportedUserId, status])
+  @@index([status])
+}
+
+// ==================== NOTIFICATIONS ====================
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String   // friend_request, message, call, room_invite, payment
+  title       String
+  body        String
+  data        Json?    // Additional data as JSON
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+// ==================== ANALYTICS ====================
+
+model UserActivity {
+  id              String   @id @default(uuid())
+  userId          String
+  activityType    String   // login, logout, call_made, message_sent, room_joined, payment
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([activityType])
+}
+
+// ==================== HOST EARNINGS SYSTEM ====================
+
+model Earning {
+  id              String   @id @default(uuid())
+  hostId          String
+  callId          String   @unique // Link to CallLog
+  callType        String   // audio, video
+  callDuration    Int      // Duration in seconds
+  totalRevenue    Float    // Total coins charged
+  hostShare       Float    // Host's earning percentage (15% for audio, 30% for video)
+  hostEarning     Float    // Actual earning amount in INR
+  status          String   @default("pending") // pending, completed, cancelled
+  processedAt     DateTime?
+  createdAt       DateTime @default(now())
+
+  @@index([hostId, status])
+  @@index([createdAt])
+}
+
+model Withdrawal {
+  id                String   @id @default(uuid())
+  userId            String
+  amount            Float    // Amount in INR
+  method            String   // upi, bank_transfer, wallet
+  status            String   @default("pending") // pending, processing, completed, failed, cancelled
+  requestedAt       DateTime @default(now())
+  processedAt       DateTime?
+  completedAt       DateTime?
+
+  // Payment details
+  upiId             String?
+  accountNumber     String?
+  ifscCode          String?
+  accountHolderName String?
+  transactionId     String?  @unique
+
+  // Admin fields
+  processedBy       String?  // Admin ID who processed
+  remarks           String?  @db.Text
+  rejectionReason   String?
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([status])
+  @@index([requestedAt])
+}
+
+model HostRating {
+  id          String   @id @default(uuid())
+  hostId      String
+  callerId    String
+  callId      String   @unique
+  rating      Int      // 1-5 stars
+  feedback    String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@index([hostId])
+  @@index([createdAt])
+}
+
+model HostBonus {
+  id          String   @id @default(uuid())
+  hostId      String
+  bonusType   String   // high_rating, long_hours, milestone, referral
+  amount      Float    // Bonus amount in INR
+  description String
+  metadata    Json?    // Additional data (ratings, hours, etc.)
+  creditedAt  DateTime @default(now())
+
+  @@index([hostId])
+  @@index([bonusType])
+}
