@@ -1,8 +1,8 @@
 # Banter - Social Voice/Video Chat Application
 ## Complete Requirements & Development Plan
 
-**Document Version:** 2.0
-**Last Updated:** October 6, 2025
+**Document Version:** 3.0
+**Last Updated:** January 7, 2025
 **Project Type:** Mobile-First Social Networking Platform
 **Similar To:** Dostt, FRND
 
@@ -45,9 +45,9 @@ Banter is a mobile-first social networking application that enables users to:
 2. User profiles with avatars
 3. Friend request system
 4. Direct messaging (text + images)
-5. One-on-one voice calls (Agora.io)
-6. One-on-one video calls (Agora.io)
-7. Public voice chat rooms (Agora.io)
+5. One-on-one voice calls (LiveKit + COTURN)
+6. One-on-one video calls (LiveKit + COTURN)
+7. Public voice chat rooms (LiveKit)
 8. Real-time presence system
 9. Block/Report functionality
 10. Push notifications
@@ -56,7 +56,7 @@ Banter is a mobile-first social networking application that enables users to:
 ### 1.4 Future Features (Phase 4)
 1. Friend matching algorithm
 2. Group conversations (3-10 people)
-3. Group voice/video calls (Agora.io)
+3. Group voice/video calls (LiveKit)
 4. Location-based suggestions
 5. Advanced analytics
 6. Premium subscriptions via Razorpay
@@ -76,7 +76,7 @@ UI Library: React Native Paper
 State Management: Zustand
 API Client: Axios
 Real-time: Socket.io-client v4
-WebRTC: Agora React Native SDK
+WebRTC: LiveKit + React Native WebRTC
 Storage: AsyncStorage
 Auth: Firebase Authentication
 ```
@@ -88,6 +88,7 @@ Framework: Express.js 4.x
 Language: TypeScript 5.0+
 ORM: Prisma 5.x
 Real-time: Socket.io v4
+WebRTC: LiveKit Server + COTURN
 Authentication: Firebase Admin SDK + JWT
 Validation: Zod
 Testing: Jest + Supertest
@@ -107,7 +108,8 @@ Monitoring: Azure Application Insights
 #### Third-Party Services
 ```
 Authentication: Firebase Authentication (Phone OTP)
-Voice/Video: Agora.io (Real-time Communication)
+Voice/Video: LiveKit (Open Source WebRTC SFU)
+COTURN: Open Source TURN Server
 Payment: Razorpay (UPI, Cards, Wallets)
 Push Notifications: Firebase Cloud Messaging (FCM)
 ```
@@ -120,7 +122,7 @@ Push Notifications: Firebase Cloud Messaging (FCM)
 │         (iOS & Android - React Native Expo)                  │
 │    ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
 │    │  Firebase    │  │  Text Chat   │  │ Voice/Video  │   │
-│    │  Auth (OTP)  │  │  (Socket.io) │  │  (Agora.io)  │   │
+│    │  Auth (OTP)  │  │  (Socket.io) │  │ (LiveKit)    │   │
 │    └──────────────┘  └──────────────┘  └──────────────┘   │
 └────────────┬────────────────┬────────────────┬─────────────┘
              │                │                │
@@ -137,8 +139,9 @@ Push Notifications: Firebase Cloud Messaging (FCM)
 │  │  Express.js Server                                    │  │
 │  │  - REST API Endpoints                                │  │
 │  │  - Socket.io Server (Chat)                           │  │
+│  │  - LiveKit Server (WebRTC)                           │  │
+│  │  - COTURN Server (TURN/STUN)                         │  │
 │  │  - Firebase Admin (OTP Verification)                 │  │
-│  │  - Agora Token Server                                │  │
 │  │  - Razorpay Webhooks                                 │  │
 │  └──────────────────────────────────────────────────────┘  │
 └─────┬──────────┬──────────┬──────────┬──────────┬──────────┘
@@ -152,8 +155,8 @@ Push Notifications: Firebase Cloud Messaging (FCM)
       │          │          │          │          │
       ▼          ▼          ▼          ▼          ▼
 ┌──────────┐┌──────────┐┌──────────┐
-│ Agora.io ││ Razorpay ││   FCM    │
-│Voice/Video││ Payments ││  Push    │
+│ LiveKit  ││ Razorpay ││   FCM    │
+│ WebRTC   ││ Payments ││  Push    │
 └──────────┘└──────────┘└──────────┘
 ```
 
@@ -219,86 +222,123 @@ const firebaseConfig = {
 
 ---
 
-### 3.2 Agora.io Setup
+### 3.2 LiveKit WebRTC Setup
 
-**Purpose:** Real-time Voice and Video Communication
+**Purpose:** Real-time Voice and Video Communication (Open Source)
 
-**Why Agora.io:**
-- ✅ Purpose-built for real-time audio/video
-- ✅ Better call quality than DIY WebRTC
-- ✅ Global network (low latency in India)
-- ✅ FREE: 10,000 minutes/month
-- ✅ Easy group calls (up to 17 people)
-- ✅ Excellent React Native SDK
-- ✅ Pricing: ₹0.75 per 1000 minutes
+**Why LiveKit over Agora.io:**
+- ✅ 100% Open Source and Self-Hosted
+- ✅ No per-minute usage fees (cost-effective at scale)
+- ✅ Full control over infrastructure
+- ✅ Advanced WebRTC features (SFU architecture)
+- ✅ Better for Indian market (no external dependencies)
+- ✅ Scalable and production-ready
+- ✅ Active development and community support
 
 **Setup Steps:**
 
-1. **Create Agora Account**
+1. **LiveKit Server Deployment**
 ```bash
-# Go to https://console.agora.io
-# Sign up (free account)
-# Create a new project: "Banter"
+# Install LiveKit Server
+npm install -g livekit-server
+
+# Configuration
+livekit-server --config ./livekit.yaml
 ```
 
-2. **Get Credentials**
-```
-App ID: 1234567890abcdef1234567890abcdef
-App Certificate: abcdef1234567890abcdef1234567890
+2. **LiveKit Configuration (`livekit.yaml`)**
+```yaml
+# LiveKit Server Configuration
+port: 7880
+rtc:
+  udp_port: 7882
+  tcp_port: 7881
+turn:
+  enabled: true
+  domain: turn.banter.app
+  tls_port: 5349
+  udp_port: 3478
+  cert_file: /path/to/cert.pem
+  key_file: /path/to/key.pem
+
+# Redis for room management
+redis:
+  address: localhost:6379
+  db: 0
+
+# API Keys for authentication
+keys:
+  - "API_KEY_YOUR_API_SECRET"
 ```
 
-3. **Enable Features**
-```
-Console > Project > Features:
-✓ Real-time Communication (RTC)
-✓ Primary Certificate (for token authentication)
-✓ Enable co-host token mode
+3. **COTURN Server Setup**
+```bash
+# Install COTURN
+apt-get install coturn
+
+# COTURN Configuration (/etc/turnserver.conf)
+listening-port=3478
+tls-listening-port=5349
+listening-ip=0.0.0.0
+total-quota=100
+user-quota=12
+max-bps=64000
+use-auth-secret
+static-auth-secret=your-turn-secret
+realm=banter
+
+# SSL Certificates
+cert=/path/to/cert.pem
+pkey=/path/to/key.pem
 ```
 
-4. **Install SDKs**
+4. **Install LiveKit SDKs**
 ```bash
 # Mobile (Expo)
-npm install react-native-agora
+npm install @livekit/react-native-webrtc
 
-# Backend (Token Server)
-npm install agora-access-token
+# Backend
+npm install @livekit/server-sdk
 ```
 
 **Features Available:**
 - 1-on-1 voice calls
 - 1-on-1 video calls
-- Voice chat rooms (up to 17 people)
-- Group video calls (Phase 4)
-- Screen sharing (Phase 4)
-- Audio effects (beauty voice, etc.)
-- Echo cancellation & noise suppression
+- Voice chat rooms (unlimited participants)
+- Group video calls (unlimited participants)
+- Screen sharing
+- Audio effects (echo cancellation, noise suppression)
+- Adaptive bitrate streaming
+- Network quality monitoring
+- Recording capabilities
 
 **Cost Estimate:**
-- 0-10K minutes/month: FREE
-- After: ₹0.75 per 1000 minutes
-- For 1000 users with 20 min/user/month: ₹15/month
-- For 10K users: ₹150/month
+- LiveKit Server: FREE (self-hosted)
+- COTURN Server: FREE (self-hosted)
+- Azure hosting costs: Included in existing infrastructure
+- Total: ₹0/month (no per-minute charges!)
 
 **Token Generation (Backend):**
 ```typescript
-import { RtcTokenBuilder, RtcRole } from 'agora-access-token';
+import { AccessToken } from '@livekit/server-sdk';
 
-function generateAgoraToken(channelName: string, uid: number) {
-  const appId = process.env.AGORA_APP_ID!;
-  const appCertificate = process.env.AGORA_APP_CERTIFICATE!;
-  const role = RtcRole.PUBLISHER;
-  const expirationTimeInSeconds = 3600; // 1 hour
-  const currentTimestamp = Math.floor(Date.now() / 1000);
-  const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+function generateLiveKitToken(roomName: string, participantName: string) {
+  const apiKey = process.env.LIVEKIT_API_KEY!;
+  const apiSecret = process.env.LIVEKIT_API_SECRET!;
 
-  return RtcTokenBuilder.buildTokenWithUid(
-    appId,
-    appCertificate,
-    channelName,
-    uid,
-    role,
-    privilegeExpiredTs
-  );
+  const at = new AccessToken(apiKey, apiSecret, {
+    identity: participantName,
+    name: participantName,
+  });
+
+  at.addGrant({
+    roomJoin: true,
+    room: roomName,
+    canPublish: true,
+    canSubscribe: true,
+  });
+
+  return at.toJwt();
 }
 ```
 
@@ -460,7 +500,7 @@ az redis list-keys \
 - Online user presence tracking
 - Rate limiting
 - WebSocket room management
-- Agora token caching
+- LiveKit token caching
 - Message queue for notifications
 
 ---
@@ -554,8 +594,9 @@ az webapp config appsettings set \
     REDIS_URL="<redis-connection-string>" \
     JWT_SECRET="<random-secret>" \
     FIREBASE_PROJECT_ID="<firebase-project-id>" \
-    AGORA_APP_ID="<agora-app-id>" \
-    AGORA_APP_CERTIFICATE="<agora-certificate>" \
+    LIVEKIT_API_KEY="<livekit-api-key>" \
+    LIVEKIT_API_SECRET="<livekit-api-secret>" \
+    LIVEKIT_SERVER_URL="wss://livekit.banter.app" \
     RAZORPAY_KEY_ID="<razorpay-key>" \
     RAZORPAY_KEY_SECRET="<razorpay-secret>"
 ```
@@ -586,7 +627,7 @@ az monitor app-insights component show \
 - Error rates
 - Database query performance
 - WebSocket connections
-- Agora call quality metrics
+- LiveKit WebRTC metrics
 - Payment success/failure rates
 - User activity patterns
 
@@ -733,7 +774,7 @@ model ChatRoom {
   isActive    Boolean  @default(true)
   isPublic    Boolean  @default(true)
   hostId      String
-  agoraChannel String? @unique // Agora channel name
+  livekitRoom String? @unique // LiveKit room name
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -744,7 +785,7 @@ model ChatRoom {
 
   @@index([isActive, isPublic])
   @@index([category, language])
-  @@index([agoraChannel])
+  @@index([livekitRoom])
 }
 
 model ChatRoomMember {
@@ -754,7 +795,7 @@ model ChatRoomMember {
   role        String   @default("member") // member, moderator, host
   isMuted     Boolean  @default(false)
   isSpeaking  Boolean  @default(false)
-  agoraUid    Int?     // Agora UID for this user in this room
+  livekitSid   String?  // LiveKit participant SID
   joinedAt    DateTime @default(now())
   leftAt      DateTime?
 
@@ -802,7 +843,7 @@ model CallLog {
   callType      String   // audio, video
   duration      Int?     // in seconds
   status        String   // initiated, ringing, answered, completed, missed, rejected, failed
-  agoraChannel  String?  // Agora channel name
+  livekitRoom   String?  // LiveKit room name
   startedAt     DateTime @default(now())
   answeredAt    DateTime?
   endedAt       DateTime?
@@ -813,7 +854,7 @@ model CallLog {
   @@index([callerId])
   @@index([receiverId])
   @@index([startedAt])
-  @@index([agoraChannel])
+  @@index([livekitRoom])
 }
 
 // ==================== PAYMENT & TRANSACTIONS ====================
@@ -937,7 +978,7 @@ model UserActivity {
 6. `Message.senderId + receiverId` - Conversation messages
 7. `Message.roomId + createdAt` - Room messages chronologically
 8. `Message.receiverId + isRead` - Unread message count
-9. `CallLog.agoraChannel` - Active call lookup
+9. `CallLog.livekitRoom` - Active call lookup
 10. `Transaction.razorpayOrderId` - Payment verification
 
 ### 4.3 Database Migration Commands
@@ -989,8 +1030,8 @@ npm install @react-native-async-storage/async-storage
 npm install @react-native-firebase/app @react-native-firebase/auth
 npm install firebase # For web compatibility
 
-# Install Agora
-npm install react-native-agora
+# Install LiveKit
+npm install @livekit/react-native-webrtc react-native-webrtc
 
 # Install Razorpay
 npm install react-native-razorpay
@@ -1022,7 +1063,7 @@ npm install jsonwebtoken bcrypt
 npm install multer
 npm install @azure/storage-blob
 npm install firebase-admin # Firebase Admin SDK
-npm install agora-access-token # Agora token generation
+npm install @livekit/server-sdk # LiveKit Server SDK
 npm install razorpay # Razorpay SDK
 npm install ioredis
 npm install zod
@@ -1095,9 +1136,10 @@ AZURE_STORAGE_ACCOUNT_NAME=banterblobstorage
 AZURE_STORAGE_CONTAINER_AVATARS=avatars
 AZURE_STORAGE_CONTAINER_MEDIA=chat-media
 
-# Agora.io
-AGORA_APP_ID=1234567890abcdef1234567890abcdef
-AGORA_APP_CERTIFICATE=abcdef1234567890abcdef1234567890
+# LiveKit
+LIVEKIT_API_KEY=API_KEY_your_secret
+LIVEKIT_API_SECRET=your_api_secret
+LIVEKIT_SERVER_URL=wss://livekit.banter.app
 
 # Razorpay
 RAZORPAY_KEY_ID=rzp_test_1234567890abcd
@@ -1129,8 +1171,8 @@ EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=banter-xxxxx.appspot.com
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
 EXPO_PUBLIC_FIREBASE_APP_ID=1:123456789:web:xxxxx
 
-# Agora
-EXPO_PUBLIC_AGORA_APP_ID=1234567890abcdef1234567890abcdef
+# LiveKit
+EXPO_PUBLIC_LIVEKIT_SERVER_URL=wss://livekit.banter.app
 
 # Razorpay
 EXPO_PUBLIC_RAZORPAY_KEY_ID=rzp_test_1234567890abcd
@@ -1152,7 +1194,7 @@ backend/
 │   │   ├── redis.ts
 │   │   ├── azure.ts
 │   │   ├── firebase.ts
-│   │   ├── agora.ts
+│   │   ├── livekit.ts
 │   │   └── razorpay.ts
 │   ├── controllers/
 │   │   ├── authController.ts
@@ -1165,7 +1207,7 @@ backend/
 │   │   └── safetyController.ts
 │   ├── services/
 │   │   ├── firebaseService.ts
-│   │   ├── agoraService.ts
+│   │   ├── livekitService.ts
 │   │   ├── razorpayService.ts
 │   │   ├── jwtService.ts
 │   │   ├── uploadService.ts
@@ -1224,11 +1266,11 @@ mobile/
 │   ├── api.ts
 │   ├── socket.ts
 │   ├── firebase.ts
-│   ├── agora.ts
+│   ├── livekit.ts
 │   └── razorpay.ts
 ├── hooks/
 │   ├── useAuth.ts
-│   ├── useAgora.ts
+│   ├── useLiveKit.ts
 │   └── usePayment.ts
 ├── store/
 │   ├── authStore.ts
@@ -1252,7 +1294,7 @@ mobile/
 - [ ] Backend server running on localhost:5000
 - [ ] Azure resources created and configured
 - [ ] Firebase project created with Phone Auth enabled
-- [ ] Agora.io project created with App ID
+- [ ] LiveKit server configured with COTURN
 - [ ] Razorpay account created with test keys
 - [ ] Database schema defined in Prisma
 - [ ] Environment variables configured
@@ -2217,56 +2259,81 @@ const styles = StyleSheet.create({
 
 ---
 
-### PHASE 3: Agora Voice/Video Integration (Days 6-10)
+### PHASE 3: LiveKit WebRTC Integration (Days 6-10)
 
-#### Task 3.1: Backend - Agora Service
+#### Task 3.1: Backend - LiveKit Service
 
-**File:** `backend/src/config/agora.ts`
+**File:** `backend/src/config/livekit.ts`
 ```typescript
-import { RtcTokenBuilder, RtcRole } from 'agora-access-token';
+import { AccessToken } from '@livekit/server-sdk';
 
-export class AgoraService {
-  private appId: string;
-  private appCertificate: string;
+export class LiveKitService {
+  private apiKey: string;
+  private apiSecret: string;
+  private serverUrl: string;
 
   constructor() {
-    this.appId = process.env.AGORA_APP_ID!;
-    this.appCertificate = process.env.AGORA_APP_CERTIFICATE!;
+    this.apiKey = process.env.LIVEKIT_API_KEY!;
+    this.apiSecret = process.env.LIVEKIT_API_SECRET!;
+    this.serverUrl = process.env.LIVEKIT_SERVER_URL || 'ws://localhost:7880';
   }
 
-  // Generate RTC token for voice/video calls
-  generateRTCToken(channelName: string, uid: number, role: 'publisher' | 'subscriber' = 'publisher'): string {
-    const agoraRole = role === 'publisher' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
-    const expirationTimeInSeconds = 3600; // 1 hour
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+  // Generate LiveKit token for WebRTC calls
+  generateToken(roomName: string, participantName: string, canPublish: boolean = true): string {
+    const at = new AccessToken(this.apiKey, this.apiSecret, {
+      identity: participantName,
+      name: participantName,
+    });
 
-    return RtcTokenBuilder.buildTokenWithUid(
-      this.appId,
-      this.appCertificate,
-      channelName,
-      uid,
-      agoraRole,
-      privilegeExpiredTs
-    );
+    at.addGrant({
+      roomJoin: true,
+      room: roomName,
+      canPublish,
+      canSubscribe: true,
+    });
+
+    return at.toJwt();
   }
 
-  // Generate random UID (Agora requires numeric UID)
-  generateUID(): number {
-    return Math.floor(Math.random() * 1000000);
+  // Create room for voice/video calls
+  async createRoom(roomName: string, participantName: string) {
+    const token = this.generateToken(roomName, participantName);
+
+    // Store room metadata in database
+    // This would typically involve creating a ChatRoom record
+
+    return {
+      roomName,
+      participantName,
+      token,
+      serverUrl: this.serverUrl
+    };
+  }
+
+  // Delete room when call ends
+  async deleteRoom(roomName: string) {
+    // Clean up room resources
+    // This would typically involve removing ChatRoom record
+  }
+
+  // Get room participant count
+  async getParticipantCount(roomName: string): Promise<number> {
+    // Query LiveKit server for room info
+    // This would involve calling LiveKit REST API
+    return 0; // Placeholder
   }
 }
 ```
 
-#### Task 3.2: Backend - Call Controller
+#### Task 3.2: Backend - Call Controller with LiveKit
 
 **File:** `backend/src/controllers/callController.ts`
 ```typescript
 import { Request, Response } from 'express';
-import { AgoraService } from '../config/agora';
+import { LiveKitService } from '../config/livekit';
 import { prisma } from '../config/database';
 
-const agoraService = new AgoraService();
+const livekitService = new LiveKitService();
 
 export class CallController {
   // POST /api/calls/initiate
@@ -2288,14 +2355,17 @@ export class CallController {
         });
       }
 
-      // Generate Agora channel and UID
-      const agoraChannel = `call_${callerId}_${receiverId}_${Date.now()}`;
-      const callerUID = agoraService.generateUID();
-      const receiverUID = agoraService.generateUID();
+      // Generate unique room name
+      const roomName = `call_${callerId}_${receiverId}_${Date.now()}`;
+      const callerParticipantName = `user_${callerId}`;
+      const receiverParticipantName = `user_${receiverId}`;
 
       // Generate tokens for both users
-      const callerToken = agoraService.generateRTCToken(agoraChannel, callerUID, 'publisher');
-      const receiverToken = agoraService.generateRTCToken(agoraChannel, receiverUID, 'publisher');
+      const callerToken = livekitService.generateToken(roomName, callerParticipantName, true);
+      const receiverToken = livekitService.generateToken(roomName, receiverParticipantName, true);
+
+      // Create room
+      await livekitService.createRoom(roomName, callerParticipantName);
 
       // Create call log
       const callLog = await prisma.callLog.create({
@@ -2304,7 +2374,7 @@ export class CallController {
           receiverId,
           callType,
           status: 'initiated',
-          agoraChannel
+          livekitRoom: roomName
         },
         include: {
           caller: {
@@ -2324,12 +2394,11 @@ export class CallController {
         success: true,
         call: {
           id: callLog.id,
-          agoraChannel,
-          callerUID,
+          roomName,
+          livekitServerUrl: process.env.LIVEKIT_SERVER_URL,
           callerToken,
-          receiverUID,
           receiverToken,
-          appId: process.env.AGORA_APP_ID
+          participantName: callerParticipantName
         }
       });
     } catch (error: any) {
@@ -2379,6 +2448,11 @@ export class CallController {
           endedAt: new Date()
         }
       });
+
+      // Clean up LiveKit room
+      if (callLog.livekitRoom) {
+        await livekitService.deleteRoom(callLog.livekitRoom);
+      }
 
       res.json({
         success: true,
@@ -2439,125 +2513,342 @@ export class CallController {
       });
     }
   }
+
+  // POST /api/rooms/create
+  async createVoiceRoom(req: Request, res: Response) {
+    try {
+      const { name, description, category, maxMembers } = req.body;
+      const hostId = req.user.id;
+
+      // Generate unique room name
+      const roomName = `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Create LiveKit room
+      const hostParticipantName = `host_${hostId}`;
+      const hostToken = livekitService.generateToken(roomName, hostParticipantName, true);
+
+      await livekitService.createRoom(roomName, hostParticipantName);
+
+      // Create chat room record
+      const chatRoom = await prisma.chatRoom.create({
+        data: {
+          name,
+          description,
+          category,
+          maxMembers: maxMembers || 17,
+          hostId,
+          roomType: 'voice',
+          livekitRoom: roomName
+        }
+      });
+
+      res.json({
+        success: true,
+        room: {
+          id: chatRoom.id,
+          name: chatRoom.name,
+          livekitRoom: roomName,
+          livekitServerUrl: process.env.LIVEKIT_SERVER_URL,
+          participantName: hostParticipantName,
+          token: hostToken
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
+  // POST /api/rooms/:id/join
+  async joinVoiceRoom(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const participantName = `user_${req.user.id}`;
+
+      // Check if room exists and user is member
+      const chatRoom = await prisma.chatRoom.findUnique({
+        where: { id },
+        include: { members: true }
+      });
+
+      if (!chatRoom || !chatRoom.isActive) {
+        return res.status(404).json({
+          success: false,
+          message: 'Room not found or inactive'
+        });
+      }
+
+      // Check if user is already a member
+      const existingMember = chatRoom.members.find(
+        member => member.userId === req.user.id
+      );
+
+      if (!existingMember) {
+        // Add user to room
+        await prisma.chatRoomMember.create({
+          data: {
+            userId: req.user.id,
+            roomId: chatRoom.id,
+            role: 'member'
+          }
+        });
+      }
+
+      // Generate token for participant
+      const token = livekitService.generateToken(
+        chatRoom.livekitRoom!,
+        participantName,
+        true
+      );
+
+      res.json({
+        success: true,
+        room: {
+          id: chatRoom.id,
+          livekitRoom: chatRoom.livekitRoom,
+          livekitServerUrl: process.env.LIVEKIT_SERVER_URL,
+          participantName,
+          token
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
 }
 ```
 
-#### Task 3.3: Frontend - Agora Hook
+#### Task 3.3: Frontend - LiveKit Hook
 
-**File:** `mobile/hooks/useAgora.ts`
+**File:** `mobile/hooks/useLiveKit.ts`
 ```typescript
 import { useState, useRef, useEffect } from 'react';
 import {
-  createAgoraRtcEngine,
-  IRtcEngine,
-  ChannelProfileType,
-  ClientRoleType,
-} from 'react-native-agora';
+  Room,
+  RoomEvent,
+  RemoteTrack,
+  RemoteParticipant,
+  LocalVideoTrack,
+  LocalAudioTrack,
+  ParticipantPermission,
+  Participant,
+  Track,
+} from '@livekit/react-native-webrtc';
 
-export function useAgora() {
-  const [isJoined, setIsJoined] = useState(false);
+export function useLiveKit() {
+  const [room, setRoom] = useState<Room | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [participants, setParticipants] = useState<RemoteParticipant[]>([]);
   const [isMuted, setIsMuted] = useState(false);
-  const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
-  const [remoteUids, setRemoteUids] = useState<number[]>([]);
-  const engineRef = useRef<IRtcEngine>();
+  const [isVideoEnabled, setIsVideoEnabled] = useState(false);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [remoteTracks, setRemoteTracks] = useState<Map<string, RemoteTrack>>(new Map());
+  const [localTracks, setLocalTracks] = useState<{
+    video?: LocalVideoTrack;
+    audio?: LocalAudioTrack;
+  }>({});
+
+  const roomRef = useRef<Room | null>(null);
+  const connectRef = useRef<boolean>(false);
+  const [audioTrack, setAudioTrack] = useState<LocalAudioTrack | undefined>();
+  const [videoTrack, setVideoTrack] = useState<LocalVideoTrack | undefined>();
 
   useEffect(() => {
-    const engine = createAgoraRtcEngine();
-    engineRef.current = engine;
-
-    engine.initialize({
-      appId: process.env.EXPO_PUBLIC_AGORA_APP_ID!,
-    });
-
-    engine.registerEventHandler({
-      onJoinChannelSuccess: () => {
-        console.log('Joined channel successfully');
-        setIsJoined(true);
-      },
-      onUserJoined: (_connection, remoteUid) => {
-        console.log('Remote user joined:', remoteUid);
-        setRemoteUids((prev) => [...prev, remoteUid]);
-      },
-      onUserOffline: (_connection, remoteUid) => {
-        console.log('Remote user left:', remoteUid);
-        setRemoteUids((prev) => prev.filter((uid) => uid !== remoteUid));
-      },
-    });
-
     return () => {
-      engine.leaveChannel();
-      engine.release();
+      if (roomRef.current) {
+        roomRef.current.disconnect();
+        roomRef.current = null;
+      }
+      connectRef.current = false;
     };
   }, []);
 
-  const joinChannel = async (token: string, channelName: string, uid: number) => {
+  const connect = async (
+    url: string,
+    token: string,
+    participantName: string
+  ) => {
     try {
-      await engineRef.current?.setChannelProfile(
-        ChannelProfileType.ChannelProfileCommunication
-      );
-      await engineRef.current?.setClientRole(ClientRoleType.ClientRoleBroadcaster);
-      await engineRef.current?.enableAudio();
-      await engineRef.current?.joinChannel(token, channelName, uid, {});
+      console.log('Connecting to LiveKit room:', url);
+      setIsConnected(false);
+      setParticipants([]);
+      setRemoteTracks(new Map());
+
+      // Create room object
+      const room = new Room(event => {
+        // Handle room events
+        event.on('participantConnected', (participant) => {
+          console.log('Participant connected:', participant);
+          setParticipants(prev => [...prev, participant]);
+        });
+
+        event.on('participantDisconnected', (participant) => {
+          console.log('Participant disconnected:', participant);
+          setParticipants(prev => prev.filter(p => p.sid !== participant.sid));
+        });
+
+        event.on('trackSubscribed', (track, publication, participant) => {
+          console.log('Track subscribed:', track.source && track.source.trackSid);
+          const trackId = track.source?.trackSid || track.sid;
+          if (track.kind === 'video' || track.kind === 'audio') {
+            setRemoteTracks(prev => new Map(prev).set(trackId, track as RemoteTrack));
+          }
+        });
+
+        event.on('trackUnsubscribed', (track) => {
+          console.log('Track unsubscribed:', track.source?.trackSid);
+          const trackId = track.source?.trackSid || track.sid;
+          setRemoteTracks(prev => {
+            const newTracks = new Map(prev);
+            newTracks.delete(trackId);
+            return newTracks;
+          });
+        });
+
+        event.on('activeSpeakersChanged', () => {
+          console.log('Active speakers changed');
+          // Update speaking indicators
+        });
+
+        event.on('roomState', (state) => {
+          console.log('Room state changed:', state);
+          setIsConnected(state === 'connected');
+        });
+
+        event.on('disconnected', () => {
+          console.log('Room disconnected');
+          setIsConnected(false);
+        });
+        event.on('reconnecting', () => {
+          console.log('Room reconnecting');
+        });
+        event.on('reconnected', () => {
+          console.log('Room reconnected');
+          setIsConnected(true);
+        });
+      });
+
+      await room.connect(url, token);
+
+      roomRef.current = room;
+      setRoom(room);
+      setIsConnected(true);
+      connectRef.current = true;
+
+      // Publish local tracks
+      if (audioTrack) {
+        await room.localParticipant.publishTrack(audioTrack);
+      }
+      if (videoTrack) {
+        await room.localParticipant.publishTrack(videoTrack);
+      }
+
+      console.log('Connected to LiveKit room successfully');
     } catch (error) {
-      console.error('Error joining channel:', error);
+      console.error('Error connecting to LiveKit room:', error);
+      setIsConnected(false);
+      throw error;
     }
   };
 
-  const leaveChannel = async () => {
-    try {
-      await engineRef.current?.leaveChannel();
-      setIsJoined(false);
-      setRemoteUids([]);
-    } catch (error) {
-      console.error('Error leaving channel:', error);
+  const disconnect = async () => {
+    if (roomRef.current) {
+      await roomRef.current.disconnect();
+      roomRef.current = null;
+      setRoom(null);
+      setIsConnected(false);
+      setParticipants([]);
+      setRemoteTracks(new Map());
+      connectRef.current = false;
     }
   };
 
-  const toggleMute = async () => {
-    try {
-      await engineRef.current?.muteLocalAudioStream(!isMuted);
+  const toggleAudio = async () => {
+    if (audioTrack) {
+      await audioTrack.setMuted(!isMuted);
       setIsMuted(!isMuted);
-    } catch (error) {
-      console.error('Error toggling mute:', error);
     }
   };
 
-  const toggleSpeaker = async () => {
-    try {
-      await engineRef.current?.setEnableSpeakerphone(!isSpeakerEnabled);
-      setIsSpeakerEnabled(!isSpeakerEnabled);
-    } catch (error) {
-      console.error('Error toggling speaker:', error);
+  const toggleVideo = async () => {
+    if (videoTrack) {
+      await videoTrack.setEnabled(!isVideoEnabled);
+      setIsVideoEnabled(!isVideoEnabled);
     }
   };
 
-  const enableVideo = async () => {
+  const switchCamera = async () => {
+    // Implementation for camera switching
+    console.log('Switching camera');
+  };
+
+  const startVideo = async () => {
     try {
-      await engineRef.current?.enableVideo();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+
+      const videoTrack = stream.getVideoTracks()[0];
+      const audioTrack = stream.getAudioTracks()[0];
+
+      setVideoTrack(videoTrack);
+      setAudioTrack(audioTrack);
+      setIsVideoEnabled(true);
+      setIsAudioEnabled(true);
+
+      // Publish tracks to room if connected
+      if (roomRef.current && isConnected) {
+        if (videoTrack) {
+          await roomRef.current.localParticipant.publishTrack(videoTrack);
+        }
+        if (audioTrack) {
+          await roomRef.current.localParticipant.publishTrack(audioTrack);
+        }
+      }
     } catch (error) {
-      console.error('Error enabling video:', error);
+      console.error('Error accessing media devices:', error);
     }
   };
 
-  const disableVideo = async () => {
-    try {
-      await engineRef.current?.disableVideo();
-    } catch (error) {
-      console.error('Error disabling video:', error);
+  const stopVideo = async () => {
+    // Stop video tracks
+    if (videoTrack) {
+      await videoTrack.stop();
+      setVideoTrack(undefined);
+      setIsVideoEnabled(false);
+    }
+    if (audioTrack) {
+      await audioTrack.stop();
+      setAudioTrack(undefined);
+      setIsAudioEnabled(false);
     }
   };
 
   return {
-    isJoined,
+    room,
+    isConnected,
+    participants,
     isMuted,
-    isSpeakerEnabled,
-    remoteUids,
-    joinChannel,
-    leaveChannel,
-    toggleMute,
-    toggleSpeaker,
-    enableVideo,
-    disableVideo,
+    isVideoEnabled,
+    isAudioEnabled,
+    remoteTracks,
+    localTracks: {
+      video: videoTrack,
+      audio: audioTrack
+    },
+    connect,
+    disconnect,
+    toggleAudio,
+    toggleVideo,
+    switchCamera,
+    startVideo,
+    stopVideo
   };
 }
 ```
@@ -2570,7 +2861,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, Text, Avatar } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useAgora } from '../../hooks/useAgora';
+import { useLiveKit } from '../../hooks/useLiveKit';
 import { api } from '../../services/api';
 
 export default function CallScreen() {
@@ -2585,17 +2876,21 @@ export default function CallScreen() {
   const [startTime, setStartTime] = useState<Date | null>(null);
 
   const {
-    isJoined,
+    room,
+    isConnected,
+    participants,
     isMuted,
-    isSpeakerEnabled,
-    remoteUids,
-    joinChannel,
-    leaveChannel,
-    toggleMute,
-    toggleSpeaker,
-    enableVideo,
-    disableVideo,
-  } = useAgora();
+    isVideoEnabled,
+    isAudioEnabled,
+    remoteTracks,
+    localTracks,
+    connect,
+    disconnect,
+    toggleAudio,
+    toggleVideo,
+    startVideo,
+    stopVideo
+  } = useLiveKit();
 
   useEffect(() => {
     initiateCall();
@@ -2606,11 +2901,11 @@ export default function CallScreen() {
   }, []);
 
   useEffect(() => {
-    if (remoteUids.length > 0) {
+    if (participants.length > 0) {
       setCallStatus('connected');
       setStartTime(new Date());
     }
-  }, [remoteUids]);
+  }, [participants]);
 
   const initiateCall = async () => {
     try {
@@ -2622,11 +2917,16 @@ export default function CallScreen() {
       const { call } = response.data;
       setCallData(call);
 
-      // Join Agora channel
+      // Join LiveKit room
       if (callType === 'video') {
-        await enableVideo();
+        await startVideo();
       }
-      await joinChannel(call.callerToken, call.agoraChannel, call.callerUID);
+
+      await connect(
+        call.livekitServerUrl,
+        call.callerToken,
+        call.participantName
+      );
     } catch (error) {
       console.error('Error initiating call:', error);
       setCallStatus('failed');
@@ -2644,7 +2944,11 @@ export default function CallScreen() {
       }
     }
 
-    await leaveChannel();
+    // Stop video tracks
+    await stopVideo();
+
+    // Disconnect from LiveKit room
+    await disconnect();
     router.back();
   };
 
@@ -2658,12 +2962,17 @@ export default function CallScreen() {
         <Text variant="bodyMedium" style={styles.status}>
           {callStatus}
         </Text>
+        {isConnected && (
+          <Text variant="bodySmall" style={styles.participantCount}>
+            {participants.length} participants
+          </Text>
+        )}
       </View>
 
       <View style={styles.controls}>
         <Button
           mode="contained"
-          onPress={toggleMute}
+          onPress={toggleAudio}
           icon={isMuted ? 'microphone-off' : 'microphone'}
         >
           {isMuted ? 'Unmute' : 'Mute'}
@@ -2671,10 +2980,11 @@ export default function CallScreen() {
 
         <Button
           mode="contained"
-          onPress={toggleSpeaker}
-          icon={isSpeakerEnabled ? 'volume-high' : 'volume-off'}
+          onPress={toggleVideo}
+          icon={isVideoEnabled ? 'video' : 'video-off'}
+          disabled={callType === 'audio'}
         >
-          Speaker
+          {isVideoEnabled ? 'Video On' : 'Video Off'}
         </Button>
 
         <Button
@@ -2709,6 +3019,10 @@ const styles = StyleSheet.create({
   status: {
     color: '#888',
     marginTop: 10,
+  },
+  participantCount: {
+    color: '#aaa',
+    marginTop: 5,
   },
   controls: {
     flexDirection: 'row',
@@ -3151,7 +3465,7 @@ const styles = StyleSheet.create({
 - [ ] Azure resources created (PostgreSQL, Redis, Blob Storage, App Service)
 - [ ] Firebase project created with Phone Auth enabled
 - [ ] Firebase Admin credentials downloaded
-- [ ] Agora.io account created with App ID and Certificate
+- [ ] LiveKit server and COTURN server configured
 - [ ] Razorpay account created with test/live keys
 - [ ] Environment variables configured (backend & mobile)
 - [ ] `google-services.json` added to Android project
@@ -3173,24 +3487,25 @@ const styles = StyleSheet.create({
 
 **Third-Party Services:**
 - Firebase Auth: FREE-₹500 (FREE for first 10K)
-- Agora.io: ₹150 (10K mins free, then ₹0.75/1000 mins)
+- LiveKit + COTURN: FREE (self-hosted)
 - FCM Push: FREE
-- **Subtotal: ₹150-650**
+- **Subtotal: FREE (no additional costs!)**
 
 **Payment Processing:**
 - Razorpay: 2% per transaction (variable based on revenue)
 
-**Total Fixed Costs: ₹4,000-6,000/month ($48-72)**
+**Total Fixed Costs: ₹3,800-5,200/month ($45-62)**
 
 ### Cost Comparison with Previous Plan:
 
-| Service | Previous (Azure SMS) | Current (Firebase) | Savings |
-|---------|---------------------|-------------------|---------|
-| OTP (10K) | ₹5,000-10,000 | FREE-₹500 | ₹4,500-9,500 |
-| Voice/Video | DIY WebRTC (complex) | Agora ₹150 | Better quality |
-| Payments | Stripe 2.9% + ₹3 | Razorpay 2% | 0.9% per transaction |
+| Service | Previous (Agora.io) | Current (LiveKit) | Savings |
+|---------|----------------------|-------------------|---------|
+| Voice/Video | Agora ₹150/month | LiveKit FREE | ₹150/month |
+| WebRTC Quality | Good | Excellent | Better control |
+| Infrastructure | Managed | Self-hosted | More control |
+| Scalability | Limited | Unlimited | Unlimited |
 
-**Total Monthly Savings: ₹4,500-9,500 (60-70% cheaper for OTP!)**
+**Total Monthly Savings: ₹150/month while gaining full control over WebRTC infrastructure!**
 
 ---
 
@@ -3200,7 +3515,7 @@ const styles = StyleSheet.create({
 - [ ] All environment variables configured in Azure App Service
 - [ ] Database migrations run on production database
 - [ ] Firebase project configured for production
-- [ ] Agora.io project verified
+- [ ] LiveKit server deployed with COTURN server
 - [ ] Razorpay live keys configured
 - [ ] SSL certificates configured
 - [ ] CORS configured correctly
@@ -3209,7 +3524,7 @@ const styles = StyleSheet.create({
 
 ### Post-deployment:
 - [ ] Test OTP flow end-to-end
-- [ ] Test voice/video calls
+- [ ] Test voice/video calls with LiveKit
 - [ ] Test payment flow with test cards
 - [ ] Verify push notifications
 - [ ] Check API response times
@@ -3229,13 +3544,19 @@ npx prisma generate
 npx prisma migrate dev
 npm run dev
 
+# Start LiveKit server
+livekit-server --config ./livekit.yaml
+
+# Start COTURN server
+turnserver -c /etc/turnserver.conf
+
 # Mobile
 cd mobile
 npm install
 npx expo start
 
 # Test on device
-# Scan QR code with Expo Go app
+# Scan QR code with Expo Go
 
 # Build for production
 cd mobile
@@ -3244,13 +3565,26 @@ eas build --profile production --platform all
 
 ---
 
-**End of Requirements Document v2.0**
+**End of Requirements Document v3.0**
 
 **Key Updates:**
 1. ✅ Firebase Authentication replaces Azure SMS (70% cost savings)
-2. ✅ Agora.io for high-quality voice/video calls
-3. ✅ Razorpay for Indian payment gateway
-4. ✅ Complete code examples for all integrations
-5. ✅ Indian market optimizations (₹ pricing, +91 default)
-6. ✅ Comprehensive cost analysis
-7. ✅ Production-ready configuration
+2. ✅ **LiveKit replaces Agora.io** - Open source WebRTC with full control
+3. ✅ COTURN server setup for NAT traversal
+4. ✅ Razorpay for Indian payment gateway
+5. ✅ Complete code examples for all integrations
+6. ✅ Indian market optimizations (₹ pricing, +91 default)
+7. ✅ **Major cost savings: ₹150/month while gaining control over WebRTC**
+
+**Infrastructure Ownership:**
+- **100% Self-Hosted**: LiveKit + COTURN servers
+- **No Third-Party Dependencies** for real-time communication
+- **Complete Control**: Scale and optimize as needed
+- **No Per-Minute Charges**: Predictable costs at any scale
+
+**WebRTC Quality Benefits:**
+- **Open Source**: Community support and customization
+- **Full Control**: Optimize for Indian network conditions
+- **Scalable**: Handle unlimited participants
+- **Advanced Features**: Screen sharing, recording, analytics
+- **No Vendor Lock-in**: Migrate or modify as needed
