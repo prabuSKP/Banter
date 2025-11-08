@@ -1,387 +1,65 @@
 # Banter - Social Voice/Video Chat Application
-## MVP Requirements & Development Plan
+## Complete Requirements & Development Plan
 
-**Document Version:** 3.1 (MVP Focus)
-**Last Updated:** January 8, 2025
-**Project Type:** Mobile-First Social Networking Platform (MVP)
-**Target:** Production-Quality Minimum Viable Product
+**Document Version:** 3.0
+**Last Updated:** January 7, 2025
+**Project Type:** Mobile-First Social Networking Platform
+**Similar To:** Dostt, FRND
 
 ---
 
 ## 📋 Table of Contents
 
-1. [MVP Executive Summary](#mvp-executive-summary)
-2. [MVP Core Features](#mvp-core-features)
-3. [Technical Architecture](#technical-architecture)
-4. [Third-Party Services Configuration](#third-party-services-configuration)
-5. [Database Schema (MVP)](#database-schema-mvp)
-6. [MVP Development Phases](#mvp-development-phases)
-7. [API Specifications (MVP)](#api-specifications-mvp)
-8. [Admin Panel Features](#admin-panel-features)
-9. [Production Quality Standards](#production-quality-standards)
-10. [Testing Strategy (MVP)](#testing-strategy-mvp)
-11. [Deployment Plan (MVP)](#deployment-plan-mvp)
-12. [MVP Timeline](#mvp-timeline)
+1. [Executive Summary](#executive-summary)
+2. [Technical Architecture](#technical-architecture)
+3. [Third-Party Services Configuration](#third-party-services-configuration)
+4. [Database Schema](#database-schema)
+5. [Development Phases](#development-phases)
+6. [API Specifications](#api-specifications)
+7. [Component Specifications](#component-specifications)
+8. [Testing Strategy](#testing-strategy)
+9. [Deployment Plan](#deployment-plan)
+10. [Project Timeline](#project-timeline)
 
 ---
 
-## 1. MVP Executive Summary
+## 1. Executive Summary
 
-### 1.1 Project Overview (MVP Focus)
-Banter MVP is a production-quality mobile application that delivers core social networking features with real-time communication:
+### 1.1 Project Overview
+Banter is a mobile-first social networking application that enables users to:
+- Make new friends through voice and video interactions
+- Join public voice chat rooms
+- Send direct messages with text, images, and voice
+- Have one-on-one voice and video calls
+- Build a verified network of friends
+- Purchase premium features via Razorpay
 
-**Core MVP Capabilities:**
-- **1-to-1 Voice/Video Calling** - High-quality WebRTC calls using LiveKit
-- **Firebase OTP Authentication** - Secure phone-based authentication
-- **Payment Gateway Integration** - Razorpay for premium features
-- **Admin Dashboard** - Complete user and content management
-- **Production Quality** - Scalable, secure, and reliable infrastructure
-
-### 1.2 Target Platforms (MVP)
+### 1.2 Target Platforms
 - **Primary**: iOS and Android (React Native with Expo)
-- **Testing**: Physical devices (real network conditions)
-- **Target Market**: India (optimized for Indian users and networks)
-- **Infrastructure**: Azure Cloud (production-ready)
+- **Testing**: Expo Go on physical devices
+- **Target Market**: India (optimized for Indian users)
+- **Future**: Web platform (Expo Web)
 
-### 1.3 MVP Core Features (Production Ready)
+### 1.3 Core Features (MVP)
+1. Phone OTP authentication (Firebase)
+2. User profiles with avatars
+3. Friend request system
+4. Direct messaging (text + images)
+5. One-on-one voice calls (LiveKit + COTURN)
+6. One-on-one video calls (LiveKit + COTURN)
+7. Public voice chat rooms (LiveKit)
+8. Real-time presence system
+9. Block/Report functionality
+10. Push notifications
+11. Payment integration (Razorpay)
 
-#### 🔐 **Authentication & Security**
-- Phone OTP verification (Firebase Authentication)
-- Secure JWT token management
-- User profile verification system
-- Rate limiting and security measures
-
-#### 📞 **1-to-1 Voice/Video Calling**
-- High-quality WebRTC calls (LiveKit + COTURN)
-- Call initiation and management
-- Audio/video controls (mute, camera toggle)
-- Call history and logging
-- Real-time call notifications
-
-#### 👤 **User Management**
-- User profiles with avatars
-- Friend request system
-- Contact synchronization
-- User status and presence
-
-#### 💳 **Payment Integration**
-- Razorpay integration for Indian market
-- Coin-based virtual economy
-- Premium features purchases
-- Payment history and refunds
-
-#### 🛡️ **Admin Features**
-- User management dashboard
-- Content moderation tools
-- Analytics and reporting
-- Payment and revenue tracking
-
----
-
-## 2. MVP Core Features
-
-### 2.1 1-to-1 Voice/Video Calling (Production Quality)
-
-#### 🔧 **Technical Implementation**
-- **WebRTC Technology**: LiveKit + COTURN (Self-hosted, cost-effective)
-- **Call Quality**: Adaptive bitrate, network optimization for India
-- **Infrastructure**: Azure hosting with auto-scaling
-- **Reliability**: 99.9% uptime, call reconnect on network drops
-
-#### 📱 **Mobile Features**
-- **Call Initiation**: Quick call buttons from user profiles
-- **Incoming Call UI**: Full-screen call interface with user info
-- **In-Call Controls**:
-  - Mute/Unmute microphone
-  - Enable/Disable camera
-  - Speaker toggle
-  - Call end
-- **Call Quality Indicators**: Network strength, connection status
-- **Call History**: Detailed logs with duration and timestamps
-
-#### 🎯 **User Experience**
-- **Smooth Call Flow**: Contact → Call → Connected → End
-- **Real-time Notifications**: Incoming call alerts
-- **Offline Handling**: Voicemail or missed call notifications
-- **Network Resilience**: Automatic reconnection on network issues
-
-#### 📊 **Performance Metrics**
-- **Call Setup Time**: < 3 seconds
-- **Audio Latency**: < 200ms
-- **Video Quality**: 720p at 30fps (adjustable)
-- **Connection Success Rate**: > 95%
-
-### 2.2 Firebase OTP Authentication (Enterprise Grade)
-
-#### 🔐 **Authentication Flow**
-1. **Phone Number Input**: +91 format validation
-2. **OTP Request**: Firebase sends 6-digit code
-3. **OTP Verification**: Auto-detect + manual input
-4. **Profile Creation**: Username, avatar, basic info
-5. **JWT Token**: Secure session management
-
-#### 🛡️ **Security Features**
-- **Rate Limiting**: Prevent OTP abuse
-- **Device Binding**: Secure device authentication
-- **Session Management**: Secure token refresh
-- **Account Recovery**: Email backup options
-- **Fraud Detection**: Anomaly detection
-
-#### 📱 **User Experience**
-- **Seamless Onboarding**: < 30 seconds total time
-- **Auto OTP Detection**: SMS auto-read on Android
-- **Biometric Support**: Fingerprint/Face unlock
-- **Multi-device Support**: Sync across devices
-
-### 2.3 Payment Gateway Integration (Razorpay - Indian Market)
-
-#### 💳 **Payment System Architecture**
-- **Payment Gateway**: Razorpay (optimized for Indian market)
-- **Virtual Currency**: Coin-based economy
-- **Payment Methods**: UPI, Credit/Debit Cards, Net Banking, Wallets
-- **Transaction Security**: PCI DSS compliance, end-to-end encryption
-
-#### 🪙 **Coin Economy (MVP)**
-- **Welcome Bonus**: 50 coins on registration
-- **Daily Rewards**: 10 coins per day login
-- **Call Costs**:
-  - Voice calls: 1 coin/minute
-  - Video calls: 2 coins/minute
-- **Premium Features**:
-  - Unlimited calls: 499 coins/month
-  - Profile verification: 100 coins (one-time)
-  - Priority support: 200 coins/month
-
-#### 💰 **Purchase Options (INR)**
-```
-₹50    → 100 coins   (Trial Pack)
-₹199   → 500 coins   (Popular Pack)
-₹499   → 1500 coins  (Value Pack)
-₹999   → 4000 coins  (Premium Pack)
-```
-
-#### 🔐 **Payment Security**
-- **Two-Factor Authentication**: For transactions > ₹500
-- **Fraud Detection**: AI-powered transaction monitoring
-- **Refund Policy**: 7-day money-back guarantee
-- **Payment History**: Detailed transaction logs
-
-#### 📱 **Payment Flow**
-1. **Select Pack**: Choose coin package
-2. **Payment Method**: Select UPI/Card/NetBanking
-3. **Authentication**: Complete Razorpay payment
-4. **Coin Credit**: Instant coin addition
-5. **Receipt**: Email + in-app confirmation
-
-### 2.4 Admin Dashboard Features (Production Management)
-
-#### 👥 **User Management**
-- **User Dashboard**: View all registered users
-- **User Search**: Filter by phone, name, registration date
-- **User Actions**: Block/Unblock, reset password, verify profile
-- **User Analytics**: Active users, retention rates, demographics
-- **Bulk Operations**: Export user lists, send notifications
-
-#### 🔍 **Content Moderation**
-- **Report Management**: User reports, content flags
-- **Automated Moderation**: AI-powered content filtering
-- **Moderator Tools**: Manual review, content removal
-- **Warning System**: Strike system for violations
-- **Appeal Process**: User appeal management
-
-#### 📊 **Analytics & Reporting**
-- **Real-time Dashboard**: Active users, ongoing calls
-- **Usage Analytics**: Call duration, peak hours, user engagement
-- **Revenue Analytics**: Payment trends, popular packages
-- **Performance Metrics**: Server uptime, call quality metrics
-- **Custom Reports**: Date range filtering, data export
-
-#### 💰 **Financial Management**
-- **Transaction Overview**: All payment transactions
-- **Revenue Tracking**: Daily/weekly/monthly revenue
-- **Refund Management**: Process refunds, track reasons
-- **Tax Compliance**: GST reports, tax documentation
-- **Payout Management**: Razorpay settlement tracking
-
-#### ⚙️ **System Administration**
-- **Server Management**: Monitor Azure services
-- **Database Management**: User data backup, maintenance
-- **API Management**: Rate limiting, API key rotation
-- **Security Monitoring**: Failed logins, suspicious activities
-- **System Logs**: Application logs, error tracking
-
----
-
-## 9. Production Quality Standards
-
-### 9.1 Performance Benchmarks (MVP Requirements)
-
-#### ⚡ **Application Performance**
-- **App Launch Time**: < 3 seconds (cold start)
-- **Screen Load Time**: < 1.5 seconds
-- **API Response Time**: < 500ms (95th percentile)
-- **Call Setup Time**: < 3 seconds
-- **Memory Usage**: < 150MB (average)
-- **Battery Usage**: < 10%/hour (active calling)
-
-#### 📞 **Call Quality Standards**
-- **Audio Latency**: < 200ms
-- **Video Quality**: 720p @ 30fps (adaptive)
-- **Connection Success Rate**: > 95%
-- **Call Drop Rate**: < 2%
-- **Echo Cancellation**: > 90% success
-- **Noise Reduction**: > 80% success
-
-#### 🌐 **Network Requirements**
-- **Minimum Bandwidth**: 1 Mbps (voice), 2 Mbps (video)
-- **Network Adaptation**: Automatic quality adjustment
-- **Offline Support**: Basic functionality available
-- **Network Resilience**: Reconnect on network issues
-
-### 9.2 Security & Compliance
-
-#### 🔒 **Data Security**
-- **Encryption**: End-to-end encryption for calls
-- **Data Storage**: Encrypted database storage
-- **API Security**: JWT authentication, HTTPS only
-- **Privacy**: GDPR compliant, Indian data laws
-- **Vulnerability Testing**: Regular security audits
-
-#### 🛡️ **Application Security**
-- **Code Obfuscation**: Release builds protected
-- **Root Detection**: Block rooted/jailbroken devices
-- **Certificate Pinning**: Prevent MITM attacks
-- **Rate Limiting**: API abuse prevention
-- **Input Validation**: Server-side validation
-
-### 9.3 Reliability & Availability
-
-#### 🔄 **System Uptime**
-- **Backend API**: 99.9% uptime target
-- **Database**: 99.95% uptime target
-- **LiveKit Server**: 99.9% uptime target
-- **Monitoring**: 24/7 health checks
-- **Incident Response**: < 30 minute response time
-
-#### 📱 **Mobile Stability**
-- **Crash Rate**: < 0.5% (99.5% stability)
-- **ANR Rate**: < 0.1% (Application Not Responding)
-- **Memory Leaks**: Zero memory leaks
-- **Background Processing**: Efficient background tasks
-
-### 9.4 Scalability Requirements
-
-#### 📈 **User Capacity**
-- **Concurrent Users**: 10,000+ concurrent users
-- **Daily Active Users**: 100,000+ DAU target
-- **Simultaneous Calls**: 5,000+ concurrent calls
-- **Database Performance**: Sub-100ms query times
-- **Auto-scaling**: Automatic resource scaling
-
-#### 💾 **Data Management**
-- **Database Backup**: Hourly backups, 30-day retention
-- **Log Retention**: 90-day log retention
-- **User Data**: GDPR right to deletion
-- **Analytics**: Real-time and batch processing
-
-### 9.5 Quality Assurance
-
-#### 🧪 **Testing Standards**
-- **Unit Test Coverage**: > 80% code coverage
-- **Integration Testing**: All API endpoints tested
-- **E2E Testing**: Critical user flows tested
-- **Performance Testing**: Load testing for peak usage
-- **Security Testing**: Penetration testing
-
-#### 📋 **Pre-Launch Checklist**
-- **Code Review**: All code peer-reviewed
-- **Security Audit**: Third-party security assessment
-- **Performance Testing**: Load and stress testing
-- **Device Testing**: Tested on 20+ devices
-- **Network Testing**: 2G, 3G, 4G, WiFi testing
-- **User Testing**: Beta testing with 100+ users
-
----
-
-## 12. MVP Timeline
-
-### 🚀 **Development Timeline (8 Weeks)**
-
-#### **Week 1-2: Foundation & Authentication**
-- [ ] Project setup (React Native + Backend)
-- [ ] Firebase OTP authentication
-- [ ] User profile management
-- [ ] Basic database schema
-- [ ] JWT security implementation
-
-#### **Week 3-4: Core Communication**
-- [ ] LiveKit + COTURN integration
-- [ ] 1-to-1 voice calling
-- [ ] 1-to-1 video calling
-- [ ] Call UI components
-- [ ] Real-time notifications
-
-#### **Week 5-6: Payment & Monetization**
-- [ ] Razorpay integration
-- [ ] Coin economy implementation
-- [ ] Payment flow testing
-- [ ] Transaction security
-- [ ] Admin dashboard (basic)
-
-#### **Week 7-8: Testing & Production**
-- [ ] Comprehensive testing
-- [ ] Performance optimization
-- [ ] Security hardening
-- [ ] Production deployment
-- [ ] User onboarding
-
-### 🎯 **Success Metrics (MVP)**
-- **User Registration**: 1,000+ users in first month
-- **Call Volume**: 10,000+ minutes/month
-- **Revenue**: ₹50,000+ monthly revenue
-- **User Retention**: 40%+ 7-day retention
-- **App Rating**: 4.0+ rating on app stores
-
----
-
-## 📋 MVP Summary
-
-### ✅ **Core MVP Features (Production Ready)**
-
-| Feature | Technology | Status | Timeline |
-|---------|------------|---------|----------|
-| **1-to-1 Voice/Video Calling** | LiveKit + COTURN | Ready | Week 3-4 |
-| **Firebase OTP Authentication** | Firebase Auth | Ready | Week 1-2 |
-| **Payment Gateway Integration** | Razorpay | Ready | Week 5-6 |
-| **Admin Dashboard** | React + Node.js | Ready | Week 5-6 |
-| **Production Quality Standards** | Azure + Monitoring | Defined | Week 7-8 |
-
-### 🎯 **MVP Success Goals**
-- **1000+ Users** in first month
-- **₹50,000+ Monthly Revenue** target
-- **99.5% App Stability** rate
-- **< 3 Second Call Setup** time
-- **4.0+ App Store Rating**
-
-### 💰 **Monetization Strategy**
-- **Coin Economy**: 1 coin/minute (voice), 2 coins/minute (video)
-- **Premium Packs**: ₹50-₹999 pricing tiers
-- **Subscription Model**: ₹499/month for unlimited calls
-- **Verification System**: ₹100 one-time profile verification
-
-### 🛡️ **Production Quality Guarantees**
-- **99.9% System Uptime** target
-- **End-to-End Encryption** for all calls
-- **PCI DSS Compliance** for payments
-- **GDPR Compliant** data handling
-- **Indian Market Optimization** (₹ pricing, +91 support)
-
-### 🚀 **Go-to-Market Timeline**
-- **8 Weeks Total Development** time
-- **Week 1-2**: Foundation & Authentication
-- **Week 3-4**: Core Communication Features
-- **Week 5-6**: Payment & Admin Features
-- **Week 7-8**: Testing & Production Deployment
+### 1.4 Future Features (Phase 4)
+1. Friend matching algorithm
+2. Group conversations (3-10 people)
+3. Group voice/video calls (LiveKit)
+4. Location-based suggestions
+5. Advanced analytics
+6. Premium subscriptions via Razorpay
 
 ---
 
