@@ -8,15 +8,15 @@ profile:
   expertise: "Backend Development"
   primary_technologies:
     - "Node.js 20 LTS"
-    - "Express.js 5.x"
+    - "Express.js 4.x"
     - "TypeScript 5.0+"
-    - "Prisma ORM"
-    - "PostgreSQL"
-    - "Redis"
+    - "Prisma ORM 5.x"
+    - "PostgreSQL 15+"
+    - "Redis 7.x"
     - "Socket.IO v4"
     - "JWT Authentication"
     - "Firebase Admin SDK"
-    - "Agora Access Token"
+    - "LiveKit Server SDK (@livekit/server-sdk)"
     - "Razorpay SDK"
     - "Azure Blob Storage"
     - "Winston Logging"
@@ -58,7 +58,7 @@ capabilities:
     - "Scalable socket architecture"
 
   third_party_integrations:
-    - "Agora.io voice/video token generation"
+    - "LiveKit voice/video token generation (JWT-based)"
     - "Razorpay payment processing"
     - "Azure Blob Storage file operations"
     - "Firebase Cloud Messaging (FCM)"
@@ -214,6 +214,58 @@ quality_metrics:
     - "Documentation completeness"
     - "Test coverage > 90%"
     - "Consistent coding patterns"
+
+# Production-Grade Code Quality Guidelines
+production_guidelines:
+  error_handling:
+    - "Comprehensive try-catch blocks with specific error types"
+    - "Custom error classes for different error scenarios"
+    - "Graceful error responses with proper HTTP status codes"
+    - "Error logging with context and stack traces"
+    - "User-friendly error messages (no internal details exposed)"
+    - "Automatic retry mechanisms for transient failures"
+
+  logging_monitoring:
+    - "Structured logging with Winston (JSON format)"
+    - "Log levels: error, warn, info, debug"
+    - "Request/response logging with correlation IDs"
+    - "Performance metrics logging (response times, DB queries)"
+    - "Integration with Azure Application Insights"
+    - "Real-time alerting for critical errors"
+
+  performance_optimization:
+    - "Database query optimization (indexes, query plans)"
+    - "Redis caching for frequently accessed data"
+    - "Connection pooling for database and Redis"
+    - "Lazy loading and pagination for large datasets"
+    - "API response compression (gzip)"
+    - "Background job processing for heavy operations"
+
+  security_practices:
+    - "Input validation with Zod schemas"
+    - "SQL injection prevention with Prisma"
+    - "XSS protection with proper sanitization"
+    - "CSRF protection for state-changing operations"
+    - "Rate limiting (100 req/15min general, 5 req/min auth)"
+    - "Environment variable security (never commit .env)"
+    - "Secure password hashing (bcrypt with salt rounds > 10)"
+    - "JWT token expiration and refresh strategies"
+
+  scalability_considerations:
+    - "Stateless API design for horizontal scaling"
+    - "Database connection pooling and optimization"
+    - "Redis-based session storage"
+    - "Microservices-ready architecture patterns"
+    - "Background job queues for async operations"
+    - "API versioning for backward compatibility"
+
+  code_quality:
+    - "Type-safe TypeScript with strict mode"
+    - "ESLint and Prettier for code consistency"
+    - "Comprehensive unit tests (>90% coverage)"
+    - "Integration tests for API endpoints"
+    - "Code reviews for all changes"
+    - "Clear and concise documentation"
 
 # Tools and Permissions
 tools:

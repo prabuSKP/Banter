@@ -265,3 +265,53 @@ learning_objectives:
     - "Payment processing data structures"
     - "Analytics and reporting databases"
     - "Multi-tenant database architectures"
+
+# Production-Grade Code Quality Guidelines
+production_guidelines:
+  error_handling:
+    - "Database transaction error handling with rollbacks"
+    - "Connection failure recovery mechanisms"
+    - "Graceful degradation for read replicas"
+    - "Detailed error logging for query failures"
+    - "Deadlock detection and automatic retry"
+
+  performance_optimization:
+    - "Query optimization with EXPLAIN ANALYZE"
+    - "Proper indexing strategy (B-tree, GIN, GIST)"
+    - "Materialized views for complex queries"
+    - "Connection pooling (max 20 connections per instance)"
+    - "Query result caching with Redis"
+    - "Batch operations for bulk inserts/updates"
+    - "Lazy loading and pagination (limit 50 per page)"
+
+  data_integrity:
+    - "Foreign key constraints enforcement"
+    - "Check constraints for business rules"
+    - "Unique constraints for data consistency"
+    - "NOT NULL constraints where appropriate"
+    - "Transaction isolation level management"
+    - "Audit trails for sensitive data changes"
+
+  migration_best_practices:
+    - "Backward compatible migrations"
+    - "Test migrations in staging first"
+    - "Rollback procedures for failed migrations"
+    - "Data validation before/after migrations"
+    - "Zero-downtime migration strategies"
+    - "Migration versioning and documentation"
+
+  backup_recovery:
+    - "Automated daily backups with 7-day retention"
+    - "Point-in-time recovery capability"
+    - "Regular backup restoration testing"
+    - "Geo-redundant backup storage"
+    - "Database disaster recovery plan"
+    - "Backup encryption and security"
+
+  security_practices:
+    - "Parameterized queries (Prisma prevents SQL injection)"
+    - "Least privilege database user permissions"
+    - "Encrypted connections (SSL/TLS)"
+    - "Sensitive data encryption at rest"
+    - "Regular security audits"
+    - "Database access logging"

@@ -31,7 +31,7 @@ subagents:
       - Database operations (Prisma ORM)
       - Authentication & authorization (Firebase + JWT)
       - Real-time features (Socket.IO)
-      - Third-party service integration (Agora, Razorpay, Azure)
+      - Third-party service integration (LiveKit, Razorpay, Azure)
       - Unit and integration testing (Jest)
     tools:
       - "Read"
@@ -56,7 +56,7 @@ subagents:
       - React Native component development
       - Expo Router navigation
       - Firebase Authentication integration
-      - Agora RTC integration
+      - LiveKit WebRTC integration
       - State management (Zustand)
       - UI/UX implementation (React Native Paper)
       - Mobile testing and debugging
@@ -98,11 +98,11 @@ subagents:
 
   # Real-time Communications Agent
   - name: "rtc-specialist"
-    description: "Agora.io and Socket.IO real-time communication specialist"
+    description: "LiveKit and Socket.IO real-time communication specialist"
     capabilities:
-      - Agora voice/video call implementation
+      - LiveKit voice/video call implementation
       - Socket.IO real-time messaging
-      - WebRTC optimization
+      - WebRTC optimization with COTURN
       - Call quality monitoring
       - Real-time event handling
     tools:
@@ -112,12 +112,12 @@ subagents:
       - "Bash"
       - "Grep"
     primary_files:
-      - "backend/src/services/agora.service.ts"
+      - "backend/src/services/livekit.service.ts"
       - "backend/src/socket/**/*.ts"
       - "backend/src/controllers/call.controller.ts"
-      - "mobile/hooks/useAgora.ts"
+      - "mobile/hooks/useLiveKit.ts"
     context_sources:
-      - "REQUIREMENTS.md#Agora.io Setup"
+      - "REQUIREMENTS.md#LiveKit WebRTC Setup"
 
   # Authentication & Security Agent
   - name: "auth-security-specialist"
@@ -312,7 +312,7 @@ context_sharing:
     "backend-developer": ["Backend architecture", "Database operations", "API contracts"]
     "mobile-developer": ["Mobile UI patterns", "Navigation flows", "State management"]
     "database-specialist": ["Schema design", "Query optimization", "Data relationships"]
-    "rtc-specialist": ["Agora SDK", "Socket.IO events", "Call protocols"]
+    "rtc-specialist": ["LiveKit SDK", "COTURN configuration", "Socket.IO events", "WebRTC protocols"]
     "auth-security-specialist": ["Firebase integration", "JWT flows", "Security patterns"]
     "payment-specialist": ["Razorpay integration", "Transaction flows", "Webhook handling"]
     "infrastructure-specialist": ["Azure services", "Deployment pipelines", "Environment config"]

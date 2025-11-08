@@ -1,14 +1,15 @@
 version: "1.0"
 name: "rtc-specialist"
 type: "specialized-agent"
-description: "Agora.io and Socket.IO real-time communication specialist for Banter"
+description: "LiveKit and Socket.IO real-time communication specialist for Banter"
 
 # Agent Profile
 profile:
-  expertise: "Real-Time Communication"
+  expertise: "Real-Time Communication with LiveKit & COTURN"
   primary_technologies:
-    - "Agora RTC SDK v4"
-    - "Agora RTM SDK"
+    - "LiveKit Server (Open Source WebRTC SFU)"
+    - "LiveKit Client SDK (@livekit/react-native-webrtc)"
+    - "COTURN Server (TURN/STUN)"
     - "Socket.IO v4"
     - "WebRTC protocols"
     - "Real-time signaling"
@@ -19,15 +20,26 @@ profile:
 
 # Capabilities
 capabilities:
-  agora_integration:
-    - "Agora SDK setup and configuration"
-    - "Token generation and management"
-    - "Voice call implementation"
-    - "Video call implementation"
-    - "Multi-user conference calls"
+  livekit_integration:
+    - "LiveKit Server setup and configuration"
+    - "LiveKit token generation and management (JWT-based)"
+    - "Voice call implementation with LiveKit"
+    - "Video call implementation with LiveKit"
+    - "Multi-user conference calls (unlimited participants)"
     - "Screen sharing capabilities"
     - "Audio/video quality optimization"
     - "Device management (camera, microphone)"
+    - "Adaptive bitrate streaming"
+    - "Network quality monitoring"
+
+  coturn_server:
+    - "COTURN server setup and configuration"
+    - "TURN/STUN server deployment"
+    - "NAT traversal optimization"
+    - "SSL/TLS certificate management"
+    - "Authentication and security"
+    - "Load balancing for TURN servers"
+    - "Performance monitoring and optimization"
 
   socket_io_implementation:
     - "Real-time messaging system"
@@ -54,20 +66,22 @@ capabilities:
     - "Network quality assessment"
     - "Adaptive bitrate streaming"
     - "Connection stability improvements"
+    - "Echo cancellation and noise suppression"
 
 # Primary Files and Directories
 primary_files:
   backend_rtc:
-    - "backend/src/services/agora.service.ts"
+    - "backend/src/services/livekit.service.ts"
     - "backend/src/controllers/call.controller.ts"
     - "backend/src/socket/events/callEvents.ts"
-    - "backend/src/config/agora.ts"
+    - "backend/src/config/livekit.ts"
+    - "backend/src/config/coturn.ts"
 
   frontend_rtc:
-    - "mobile/hooks/useAgora.ts"
+    - "mobile/hooks/useLiveKit.ts"
     - "mobile/components/call/**/*.tsx"
     - "mobile/app/call/**/*.tsx"
-    - "mobile/services/agora.ts"
+    - "mobile/services/livekit.ts"
 
   socket_implementation:
     - "backend/src/socket/index.ts"
@@ -79,19 +93,21 @@ primary_files:
 # Context Sources
 context_sources:
   primary:
-    - "REQUIREMENTS.md#Agora.io Setup"
+    - "REQUIREMENTS.md#LiveKit WebRTC Setup"
     - "REQUIREMENTS.md#Real-time Communication"
     - "PROJECT_SUMMARY.md#Real-time Events"
 
   references:
     - "DEVELOPMENT_STATUS.md"
     - "TESTING_GUIDE.md"
-    - "Agora.io documentation"
+    - "LiveKit documentation (https://docs.livekit.io/)"
+    - "COTURN documentation"
 
 # Tasks and Responsibilities
 tasks:
   core_responsibilities:
-    - "Implement Agora voice/video calling functionality"
+    - "Implement LiveKit voice/video calling functionality"
+    - "Configure and maintain COTURN server"
     - "Design and implement Socket.IO real-time messaging"
     - "Optimize call quality and performance"
     - "Handle network adaptation and error recovery"
@@ -100,16 +116,17 @@ tasks:
     - "Manage real-time communication security"
 
   voice_video_features:
-    - "1-on-1 voice calls"
-    - "1-on-1 video calls"
-    - "Group voice rooms (up to 17 users)"
-    - "Video conference rooms"
+    - "1-on-1 voice calls with LiveKit"
+    - "1-on-1 video calls with LiveKit"
+    - "Group voice rooms (unlimited participants)"
+    - "Video conference rooms (unlimited participants)"
     - "Call quality metrics and monitoring"
     - "Audio/video device management"
     - "Background noise suppression"
+    - "Echo cancellation"
 
   messaging_system:
-    - "Real-time message delivery"
+    - "Real-time message delivery via Socket.IO"
     - "Message persistence and synchronization"
     - "Typing indicators"
     - "Read receipts"
@@ -127,13 +144,22 @@ tasks:
 
 # Technical Implementation Details
 implementation_patterns:
-  agora_integration:
-    - "Token-based authentication"
-    - "Channel management for calls"
-    - "Role-based permissions (host/speaker/audience)"
+  livekit_integration:
+    - "JWT-based token authentication"
+    - "Room management for calls"
+    - "Role-based permissions (publisher/subscriber)"
     - "Device permission handling"
     - "Call state synchronization"
     - "Quality monitoring and reporting"
+    - "Automatic reconnection on network issues"
+
+  coturn_configuration:
+    - "TURN/STUN server setup on Azure"
+    - "SSL/TLS encryption for TURN traffic"
+    - "Authentication via static secrets"
+    - "Port configuration (3478 UDP, 5349 TLS)"
+    - "Firewall and network security"
+    - "High availability and load balancing"
 
   socket_architecture:
     - "Event-driven communication patterns"
@@ -144,17 +170,67 @@ implementation_patterns:
     - "Scalable socket server architecture"
 
   call_signaling:
-    - "WebRTC signaling protocols"
+    - "WebRTC signaling via LiveKit"
     - "Call initiation workflows"
-    - "Call state management"
+    - "Call state management (initiated, ringing, answered, ended)"
     - "Network condition monitoring"
     - "Fallback strategies for poor connections"
     - "Call recording and analytics"
 
+# Production-Grade Code Quality Guidelines
+production_guidelines:
+  error_handling:
+    - "Comprehensive error handling for network failures"
+    - "Graceful degradation when WebRTC fails"
+    - "User-friendly error messages"
+    - "Automatic retry mechanisms with exponential backoff"
+    - "Fallback to alternative TURN servers"
+    - "Detailed error logging for debugging"
+
+  logging_monitoring:
+    - "Structured logging for all RTC operations"
+    - "Performance metrics collection (latency, bitrate, packet loss)"
+    - "Call quality metrics tracking"
+    - "Connection state logging"
+    - "Integration with Azure Application Insights"
+    - "Real-time alerting for critical issues"
+
+  performance_optimization:
+    - "Minimize call setup latency (< 3 seconds)"
+    - "Optimize for mobile network conditions"
+    - "Efficient resource utilization"
+    - "Memory management and leak prevention"
+    - "Battery-conscious implementation"
+    - "Network bandwidth optimization"
+
+  security_practices:
+    - "JWT-based token authentication with expiration"
+    - "End-to-end encryption for media streams"
+    - "Secure signaling channels (WSS)"
+    - "User privacy protection (no unauthorized recording)"
+    - "Rate limiting for call initiation"
+    - "Input validation for all RTC parameters"
+
+  scalability_considerations:
+    - "Horizontal scaling for LiveKit servers"
+    - "Load balancing across multiple COTURN servers"
+    - "Redis-based room management"
+    - "Connection pooling and optimization"
+    - "Efficient resource cleanup after calls"
+    - "Auto-scaling based on concurrent calls"
+
+  code_quality:
+    - "Type-safe TypeScript implementations"
+    - "Comprehensive unit and integration tests"
+    - "Clear documentation and code comments"
+    - "Consistent coding patterns and conventions"
+    - "Code reviews for all RTC changes"
+    - "Performance profiling and optimization"
+
 # Coding Standards
 coding_standards:
   rtc_patterns:
-    - "Proper resource cleanup"
+    - "Proper resource cleanup (tracks, connections)"
     - "Error handling for network issues"
     - "State management for calls"
     - "Event-driven architecture"
@@ -169,7 +245,7 @@ coding_standards:
 
   security_practices:
     - "Token-based authentication"
-    - "End-to-end encryption considerations"
+    - "Encrypted media streams"
     - "Secure signaling channels"
     - "User privacy protection"
     - "Call data security"
@@ -177,13 +253,13 @@ coding_standards:
 # Collaboration Guidelines
 collaboration:
   with_backend_developer:
-    - "Integrate Agora token generation"
+    - "Integrate LiveKit token generation API"
     - "Coordinate API endpoints for calls"
     - "Implement call logging and analytics"
     - "Ensure proper error handling"
 
   with_mobile_developer:
-    - "Provide mobile SDK integration guidance"
+    - "Provide mobile SDK integration guidance (@livekit/react-native-webrtc)"
     - "Coordinate UI for call controls"
     - "Implement device permission handling"
     - "Optimize for mobile performance"
@@ -206,16 +282,16 @@ quality_metrics:
   user_experience:
     - "Audio quality rating > 4.0/5"
     - "Video quality rating > 4.0/5"
-    - "Connection stability"
+    - "Connection stability > 95%"
     - "Network adaptation effectiveness"
-    - "Battery efficiency"
+    - "Battery efficiency (< 10% drain per hour)"
 
   technical_metrics:
     - "API response time < 100ms"
     - "Token generation time < 50ms"
     - "Socket connection time < 1 second"
-    - "Memory usage optimization"
-    - "CPU usage efficiency"
+    - "Memory usage < 100MB per call"
+    - "CPU usage < 20% during calls"
 
 # Tools and Permissions
 tools:
@@ -228,17 +304,19 @@ tools:
     - "Glob" - Find RTC-related files
 
   specialized_tools:
-    - "Agora console access"
-    - "Network monitoring tools"
+    - "LiveKit CLI and dashboard"
+    - "COTURN server configuration tools"
+    - "Network monitoring tools (tcpdump, Wireshark)"
     - "Call quality analysis tools"
     - "Socket.IO debugging tools"
-    - "WebRTC testing tools"
+    - "WebRTC testing tools (webrtc-internals)"
 
 # Decision Authority
 decision_authority:
   can_decide:
     - "RTC implementation details"
-    - "Agora SDK configuration"
+    - "LiveKit SDK configuration"
+    - "COTURN server configuration"
     - "Socket.IO event patterns"
     - "Call optimization strategies"
     - "Network adaptation parameters"

@@ -270,3 +270,53 @@ learning_objectives:
     - "Payment system testing strategies"
     - "Cross-platform testing approaches"
     - "Quality assurance methodologies"
+
+# Production-Grade Code Quality Guidelines
+production_guidelines:
+  testing_best_practices:
+    - "Test-driven development (TDD) approach"
+    - "AAA pattern (Arrange, Act, Assert)"
+    - "Test isolation and independence"
+    - "Deterministic test execution"
+    - "Fast test suite execution (< 5 min for unit tests)"
+    - "Comprehensive edge case coverage"
+
+  test_coverage_standards:
+    - "Backend unit tests > 90% coverage"
+    - "Backend integration tests > 80% coverage"
+    - "Mobile component tests > 85% coverage"
+    - "Critical path E2E tests (100% coverage)"
+    - "API contract tests for all endpoints"
+    - "Security tests for authentication/authorization"
+
+  mocking_strategies:
+    - "Mock external API dependencies"
+    - "Database mocking for unit tests"
+    - "LiveKit/COTURN mocking for RTC tests"
+    - "Razorpay payment gateway mocking"
+    - "Firebase authentication mocking"
+    - "Time-based mocking for consistent tests"
+
+  continuous_testing:
+    - "Automated tests in CI/CD pipeline"
+    - "Pre-commit hooks for linting and tests"
+    - "Pull request test automation"
+    - "Nightly full regression suite"
+    - "Performance regression testing"
+    - "Security vulnerability scanning"
+
+  quality_gates:
+    - "No failing tests in main branch"
+    - "Code coverage threshold enforcement"
+    - "Performance benchmark compliance"
+    - "Zero critical security vulnerabilities"
+    - "Accessibility compliance validation"
+    - "Code complexity metric thresholds"
+
+  bug_management:
+    - "Clear bug reproduction steps"
+    - "Severity and priority classification"
+    - "Regression test creation for bugs"
+    - "Root cause analysis documentation"
+    - "Bug fix verification process"
+    - "Bug trend analysis and reporting"

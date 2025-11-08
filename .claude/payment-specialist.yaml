@@ -251,3 +251,45 @@ learning_objectives:
     - "Mobile payment optimization"
     - "Payment regulations and compliance"
     - "FinTech best practices and innovations"
+
+# Production-Grade Code Quality Guidelines
+production_guidelines:
+  error_handling:
+    - "Comprehensive payment failure handling"
+    - "Graceful webhook failure recovery"
+    - "Payment retry mechanisms with exponential backoff"
+    - "Duplicate payment prevention (idempotency)"
+    - "Clear error messages for users"
+    - "Failed payment notification system"
+
+  transaction_security:
+    - "Webhook signature verification (mandatory)"
+    - "Idempotent payment processing"
+    - "Atomic database transactions for payments"
+    - "Payment state machine (pending→success→failed)"
+    - "Never store raw card details"
+    - "PCI DSS compliance adherence"
+    - "Payment data encryption"
+
+  logging_monitoring:
+    - "Comprehensive payment event logging"
+    - "Transaction correlation IDs"
+    - "Real-time payment monitoring dashboard"
+    - "Failed payment alerting"
+    - "Revenue tracking and analytics"
+    - "Webhook delivery monitoring"
+
+  performance_optimization:
+    - "Asynchronous payment processing"
+    - "Background job queues for webhooks"
+    - "Payment status caching (Redis)"
+    - "Optimized database queries for transactions"
+    - "Connection pooling for Razorpay API"
+
+  compliance_best_practices:
+    - "Transaction audit trails"
+    - "Customer payment data protection"
+    - "Refund policy implementation"
+    - "GST and tax calculation"
+    - "Regulatory reporting capabilities"
+    - "User consent for recurring payments"

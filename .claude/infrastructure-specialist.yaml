@@ -252,3 +252,53 @@ learning_objectives:
     - "Multi-cloud architecture patterns"
     - "Disaster recovery and business continuity"
     - "Cost optimization and financial operations"
+
+# Production-Grade Code Quality Guidelines
+production_guidelines:
+  deployment_best_practices:
+    - "Zero-downtime deployments (blue-green/canary)"
+    - "Automated rollback on failure detection"
+    - "Health checks before traffic switching"
+    - "Database migration automation in CI/CD"
+    - "Environment parity (dev/staging/prod)"
+    - "Deployment approval gates for production"
+
+  monitoring_alerting:
+    - "Comprehensive application monitoring (APM)"
+    - "Real-time error alerting (email/Slack)"
+    - "Performance threshold alerts"
+    - "Custom dashboards for key metrics"
+    - "Log aggregation and analysis"
+    - "Uptime monitoring (99.9% SLA)"
+
+  security_hardening:
+    - "Network security groups (NSG) configuration"
+    - "Private endpoints for databases"
+    - "SSL/TLS certificate automation (Let's Encrypt)"
+    - "Azure Key Vault for secrets management"
+    - "Regular security scanning and patching"
+    - "DDoS protection and WAF rules"
+
+  scalability_reliability:
+    - "Auto-scaling based on CPU/memory metrics"
+    - "Load balancer health checks"
+    - "Database read replicas for scaling"
+    - "CDN for static assets (Azure Front Door)"
+    - "Connection pooling and optimization"
+    - "Graceful degradation strategies"
+
+  cost_optimization:
+    - "Right-sizing of Azure resources"
+    - "Reserved instances for production"
+    - "Auto-shutdown for dev/staging environments"
+    - "Resource usage monitoring and alerts"
+    - "Blob storage lifecycle management"
+    - "CDN caching optimization"
+
+  disaster_recovery:
+    - "Automated backup verification"
+    - "Geo-redundant storage for critical data"
+    - "RTO (Recovery Time Objective) < 4 hours"
+    - "RPO (Recovery Point Objective) < 1 hour"
+    - "Regular disaster recovery drills"
+    - "Documented runbooks for incidents"

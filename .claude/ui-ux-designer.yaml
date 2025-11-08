@@ -290,3 +290,55 @@ learning_objectives:
     - "Mobile payment user experience"
     - "Accessibility and inclusive design"
     - "User research and testing methodologies"
+
+# Production-Grade Code Quality Guidelines
+production_guidelines:
+  design_system:
+    - "Consistent component library (React Native Paper)"
+    - "Design tokens for colors, spacing, typography"
+    - "Reusable UI components"
+    - "Documented component patterns"
+    - "Style guide adherence"
+    - "Cross-platform consistency"
+
+  accessibility:
+    - "WCAG 2.1 AA compliance"
+    - "Screen reader support"
+    - "Proper color contrast ratios (4.5:1)"
+    - "Touch target size (min 44x44 pts)"
+    - "Keyboard navigation support"
+    - "Alt text for images"
+    - "Accessible form labels"
+
+  performance:
+    - "Lazy loading for images"
+    - "Optimized image sizes and formats"
+    - "Smooth animations (60 FPS)"
+    - "Minimal re-renders"
+    - "Efficient layout calculations"
+    - "Progressive image loading"
+
+  responsive_design:
+    - "Mobile-first approach"
+    - "Support for various screen sizes"
+    - "Portrait and landscape orientations"
+    - "Tablet and phone optimizations"
+    - "Safe area handling for notches"
+    - "Dynamic type support"
+
+  user_experience:
+    - "Intuitive navigation flows"
+    - "Clear call-to-action buttons"
+    - "Loading states and skeletons"
+    - "Error states with recovery options"
+    - "Empty states with guidance"
+    - "Success feedback and confirmations"
+    - "Micro-interactions and animations"
+
+  usability_testing:
+    - "User testing for new features"
+    - "A/B testing for design variations"
+    - "Analytics tracking for user behavior"
+    - "Heatmap analysis"
+    - "User feedback collection"
+    - "Iterative design improvements"

@@ -14,7 +14,7 @@ profile:
     - "React Native Paper"
     - "Zustand (state management)"
     - "React Native Firebase"
-    - "Agora React Native SDK"
+    - "LiveKit React Native SDK (@livekit/react-native-webrtc)"
     - "React Native Razorpay"
     - "Socket.IO Client"
     - "AsyncStorage"
@@ -53,11 +53,12 @@ capabilities:
     - "Background processing"
 
   voice_video_integration:
-    - "Agora RTC SDK integration"
-    - "Voice call implementation"
-    - "Video call implementation"
+    - "LiveKit WebRTC SDK integration"
+    - "Voice call implementation with LiveKit"
+    - "Video call implementation with LiveKit"
     - "Call quality monitoring"
     - "Device permissions handling"
+    - "Automatic reconnection and error recovery"
 
   payment_integration:
     - "Razorpay payment gateway"
@@ -213,6 +214,68 @@ quality_metrics:
     - "TypeScript strict compliance"
     - "Code complexity metrics"
     - "Consistent coding patterns"
+
+# Production-Grade Code Quality Guidelines
+production_guidelines:
+  error_handling:
+    - "Comprehensive error boundaries for component crashes"
+    - "Graceful error messages for network failures"
+    - "Offline mode support with local data caching"
+    - "Automatic retry mechanisms for failed requests"
+    - "User-friendly error notifications"
+    - "Crash reporting integration (Sentry/Firebase Crashlytics)"
+
+  logging_monitoring:
+    - "Structured logging for debugging"
+    - "Analytics tracking for user interactions"
+    - "Performance monitoring (screen load times, API calls)"
+    - "Crash reporting with stack traces"
+    - "User session tracking"
+    - "Network request logging"
+
+  performance_optimization:
+    - "React.memo for component optimization"
+    - "useMemo and useCallback for expensive operations"
+    - "Lazy loading for screens and heavy components"
+    - "Image optimization and caching"
+    - "Virtualized lists for large datasets (FlatList, SectionList)"
+    - "Code splitting and bundle size optimization"
+    - "Background task management"
+
+  security_practices:
+    - "Secure token storage (Expo SecureStore/Keychain)"
+    - "Input validation on client side"
+    - "No sensitive data in AsyncStorage"
+    - "SSL pinning for API requests"
+    - "Proper permission handling (camera, microphone, storage)"
+    - "Deep link security (validate URLs)"
+    - "Biometric authentication implementation"
+
+  scalability_considerations:
+    - "Modular component architecture"
+    - "Reusable hooks and utilities"
+    - "State management optimization (Zustand stores)"
+    - "API request deduplication"
+    - "Efficient navigation structure"
+    - "Platform-specific code organization"
+
+  code_quality:
+    - "Type-safe TypeScript with strict mode"
+    - "ESLint and Prettier for consistency"
+    - "Component testing with React Native Testing Library"
+    - "Snapshot testing for UI components"
+    - "E2E testing for critical flows"
+    - "Code reviews for all changes"
+    - "Comprehensive documentation"
+
+  mobile_best_practices:
+    - "Battery usage optimization"
+    - "Network usage monitoring"
+    - "Memory leak prevention"
+    - "Proper cleanup in useEffect"
+    - "Background state handling"
+    - "Push notification optimization"
+    - "Deep linking implementation"
 
   app_store_readiness:
     - "App Store guidelines compliance"
