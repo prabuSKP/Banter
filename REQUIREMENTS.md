@@ -26,13 +26,10 @@
 ## 1. Executive Summary
 
 ### 1.1 Project Overview
-Banter is a mobile-first social networking application that enables users to:
-- Make new friends through voice and video interactions
-- Join public voice chat rooms
-- Send direct messages with text, images, and voice
-- Have one-on-one voice and video calls
-- Build a verified network of friends
+Banter is a mobile-first voice/video calling application that enables users to:
+- Have one-on-one voice and video calls (credit-based)
 - Purchase premium features via Razorpay
+- Manage their account and payment history
 
 ### 1.2 Target Platforms
 - **Primary**: iOS and Android (React Native with Expo)
@@ -43,23 +40,20 @@ Banter is a mobile-first social networking application that enables users to:
 ### 1.3 Core Features (MVP)
 1. Phone OTP authentication (Firebase)
 2. User profiles with avatars
-3. Friend request system
-4. Direct messaging (text + images)
-5. One-on-one voice calls (LiveKit + COTURN)
-6. One-on-one video calls (LiveKit + COTURN)
-7. Public voice chat rooms (LiveKit)
-8. Real-time presence system
-9. Block/Report functionality
-10. Push notifications
-11. Payment integration (Razorpay)
+3. One-on-one voice calls (LiveKit + COTURN) - Credit-based
+4. One-on-one video calls (LiveKit + COTURN) - Credit-based
+5. Credit system and payment integration (Razorpay)
+6. Call history and usage tracking
+7. Push notifications for incoming calls
+8. Account management and profile settings
 
-### 1.4 Future Features (Phase 4)
-1. Friend matching algorithm
-2. Group conversations (3-10 people)
-3. Group voice/video calls (LiveKit)
-4. Location-based suggestions
-5. Advanced analytics
-6. Premium subscriptions via Razorpay
+### 1.4 Future Features (Phase 2)
+1. Contact list and favorites
+2. Call quality analytics
+3. Premium subscriptions via Razorpay
+4. Multi-language support
+5. Advanced user profiles
+6. Call recording feature
 
 ---
 
@@ -75,10 +69,10 @@ Router: Expo Router (file-based routing)
 UI Library: React Native Paper
 State Management: Zustand
 API Client: Axios
-Real-time: Socket.io-client v4
 WebRTC: LiveKit + React Native WebRTC
 Storage: AsyncStorage
 Auth: Firebase Authentication
+Push Notifications: Firebase Cloud Messaging (FCM)
 ```
 
 #### Backend
@@ -87,12 +81,12 @@ Runtime: Node.js 20 LTS
 Framework: Express.js 4.x
 Language: TypeScript 5.0+
 ORM: Prisma 5.x
-Real-time: Socket.io v4
 WebRTC: LiveKit Server + COTURN
 Authentication: Firebase Admin SDK + JWT
 Validation: Zod
 Testing: Jest + Supertest
 Payment: Razorpay Node SDK
+Push Notifications: Firebase Admin SDK
 ```
 
 #### Azure Services (Infrastructure)
@@ -121,8 +115,8 @@ Push Notifications: Firebase Cloud Messaging (FCM)
 │                    Mobile Clients                            │
 │         (iOS & Android - React Native Expo)                  │
 │    ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
-│    │  Firebase    │  │  Text Chat   │  │ Voice/Video  │   │
-│    │  Auth (OTP)  │  │  (Socket.io) │  │ (LiveKit)    │   │
+│    │  Firebase    │  │  Voice/Video │  │   Razorpay   │   │
+│    │  Auth (OTP)  │  │ (LiveKit)    │  │  Payments    │   │
 │    └──────────────┘  └──────────────┘  └──────────────┘   │
 └────────────┬────────────────┬────────────────┬─────────────┘
              │                │                │
@@ -138,11 +132,11 @@ Push Notifications: Firebase Cloud Messaging (FCM)
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │  Express.js Server                                    │  │
 │  │  - REST API Endpoints                                │  │
-│  │  - Socket.io Server (Chat)                           │  │
 │  │  - LiveKit Server (WebRTC)                           │  │
 │  │  - COTURN Server (TURN/STUN)                         │  │
 │  │  - Firebase Admin (OTP Verification)                 │  │
 │  │  - Razorpay Webhooks                                 │  │
+│  │  - Credit Management System                          │  │
 │  └──────────────────────────────────────────────────────┘  │
 └─────┬──────────┬──────────┬──────────┬──────────┬──────────┘
       │          │          │          │          │
@@ -656,7 +650,7 @@ az monitor app-insights component show \
 
 ---
 
-## 4. Database Schema
+## 4. Database Schema (MVP - Simplified)
 
 ### 4.1 Complete Prisma Schema
 
@@ -690,30 +684,21 @@ model User {
   isVerified    Boolean   @default(false)
   isOnline      Boolean   @default(false)
   lastSeen      DateTime?
-  coins         Int       @default(100)
+  coins         Int       @default(100) // Starting credits
   isPremium     Boolean   @default(false)
   premiumUntil  DateTime?
   fcmToken      String?   // For push notifications
 
   // Preferences stored as JSON
-  interests     String[]  // ["sports", "music", "gaming"]
-  lookingFor    String[]  // ["friendship", "chat", "advice"]
+  interests     String[]  // ["sports", "music", "gaming", "technology", "travel"]
 
   // Timestamps
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  sentRequests      FriendRequest[] @relation("SentRequests")
-  receivedRequests  FriendRequest[] @relation("ReceivedRequests")
-  friends           Friendship[]    @relation("UserFriends")
-  friendOf          Friendship[]    @relation("FriendOf")
-  sentMessages      Message[]       @relation("SentMessages")
-  receivedMessages  Message[]       @relation("ReceivedMessages")
   callsMade         CallLog[]       @relation("CallsMade")
   callsReceived     CallLog[]       @relation("CallsReceived")
-  chatRoomMembers   ChatRoomMember[]
-  hostedRooms       ChatRoom[]      @relation("RoomHost")
   reports           Report[]        @relation("Reporter")
   reportedBy        Report[]        @relation("ReportedUser")
   blockedUsers      BlockedUser[]   @relation("BlockedBy")
@@ -726,135 +711,32 @@ model User {
   @@index([firebaseUid])
   @@index([username])
   @@index([isOnline])
+  @@index([gender])
+  @@index([dateOfBirth])
 }
 
-// ==================== FRIENDSHIP SYSTEM ====================
-
-model FriendRequest {
-  id          String   @id @default(uuid())
-  senderId    String
-  receiverId  String
-  status      String   @default("pending") // pending, accepted, rejected
-  message     String?  // Optional message with request
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  sender      User     @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver    User     @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
-
-  @@unique([senderId, receiverId])
-  @@index([receiverId, status])
-}
-
-model Friendship {
-  id          String   @id @default(uuid())
-  userId      String
-  friendId    String
-  createdAt   DateTime @default(now())
-
-  user        User     @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
-  friend      User     @relation("FriendOf", fields: [friendId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, friendId])
-  @@index([userId])
-  @@index([friendId])
-}
-
-// ==================== CHAT ROOMS ====================
-
-model ChatRoom {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  coverImage  String?
-  roomType    String   @default("voice") // voice, video, text
-  category    String?  // relationships, career, casual, gaming, music
-  language    String   @default("en")
-  maxMembers  Int      @default(10)
-  isActive    Boolean  @default(true)
-  isPublic    Boolean  @default(true)
-  hostId      String
-  livekitRoom String? @unique // LiveKit room name
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  host        User     @relation("RoomHost", fields: [hostId], references: [id])
-  members     ChatRoomMember[]
-  messages    Message[]
-
-  @@index([isActive, isPublic])
-  @@index([category, language])
-  @@index([livekitRoom])
-}
-
-model ChatRoomMember {
-  id          String   @id @default(uuid())
-  userId      String
-  roomId      String
-  role        String   @default("member") // member, moderator, host
-  isMuted     Boolean  @default(false)
-  isSpeaking  Boolean  @default(false)
-  livekitSid   String?  // LiveKit participant SID
-  joinedAt    DateTime @default(now())
-  leftAt      DateTime?
-
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  room        ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, roomId])
-  @@index([roomId])
-}
-
-// ==================== MESSAGING ====================
-
-model Message {
-  id          String   @id @default(uuid())
-  senderId    String
-  receiverId  String?  // For direct messages
-  roomId      String?  // For room messages
-  content     String   @db.Text
-  messageType String   @default("text") // text, image, audio, video, gif
-  mediaUrl    String?
-  isRead      Boolean  @default(false)
-  isEdited    Boolean  @default(false)
-  isDeleted   Boolean  @default(false)
-  replyToId   String?  // For message replies
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver    User?    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-  room        ChatRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  replyTo     Message? @relation("MessageReplies", fields: [replyToId], references: [id])
-  replies     Message[] @relation("MessageReplies")
-
-  @@index([senderId, receiverId])
-  @@index([roomId, createdAt])
-  @@index([receiverId, isRead])
-}
-
-// ==================== VOICE/VIDEO CALLS ====================
+// ==================== CALL MANAGEMENT ====================
 
 model CallLog {
-  id            String   @id @default(uuid())
-  callerId      String
-  receiverId    String
-  callType      String   // audio, video
-  duration      Int?     // in seconds
-  status        String   // initiated, ringing, answered, completed, missed, rejected, failed
-  livekitRoom   String?  // LiveKit room name
-  startedAt     DateTime @default(now())
-  answeredAt    DateTime?
-  endedAt       DateTime?
+  id          String   @id @default(uuid())
+  callerId    String
+  receiverId  String
+  callType    String   // "audio" or "video"
+  status      String   @default("initiated") // "initiated", "answered", "completed", "missed", "rejected"
+  livekitRoom String?  // LiveKit room name
+  duration    Int?     // Duration in seconds
+  coinsDeducted Int?   // Credits deducted for the call
+  startedAt   DateTime?
+  endedAt     DateTime?
+  createdAt   DateTime @default(now())
 
-  caller        User     @relation("CallsMade", fields: [callerId], references: [id], onDelete: Cascade)
-  receiver      User     @relation("CallsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+  caller      User     @relation("CallsMade", fields: [callerId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("CallsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
 
-  @@index([callerId])
-  @@index([receiverId])
-  @@index([startedAt])
+  @@index([callerId, status])
+  @@index([receiverId, status])
   @@index([livekitRoom])
+  @@index([createdAt])
 }
 
 // ==================== PAYMENT & TRANSACTIONS ====================
