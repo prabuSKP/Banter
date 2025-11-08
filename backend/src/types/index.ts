@@ -47,14 +47,14 @@ export interface CallPayload {
   callerId: string;
   receiverId: string;
   callType: 'audio' | 'video';
-  agoraChannel: string;
-  agoraToken: string;
+  livekitRoom: string;
+  livekitToken: string;
 }
 
 export interface RoomJoinPayload {
   userId: string;
   roomId: string;
-  agoraUid: number;
+  identity: string; // LiveKit uses string identities
 }
 
 export interface TypingPayload {
@@ -63,12 +63,15 @@ export interface TypingPayload {
   isTyping: boolean;
 }
 
-// Agora types
-export interface AgoraTokenResponse {
+// LiveKit types
+export interface LiveKitTokenResponse {
   token: string;
-  channel: string;
-  uid: number;
+  roomName: string;
+  identity: string;
   expiresAt: number;
+  serverUrl: string;
+  canPublish: boolean;
+  canSubscribe: boolean;
 }
 
 // Payment types

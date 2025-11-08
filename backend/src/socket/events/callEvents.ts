@@ -9,18 +9,20 @@ export const registerCallEvents = (socket: Socket, io: SocketIOServer, userId: s
   socket.on('call:initiate', (data: {
     receiverId: string;
     callType: 'audio' | 'video';
-    agoraChannel: string;
-    agoraToken: string;
+    livekitRoom: string;
+    livekitToken: string;
+    callId: string;
   }) => {
     const receiverSocketId = socketHelper.getUserSocketId(data.receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('call:incoming', {
         callerId: userId,
         callType: data.callType,
-        agoraChannel: data.agoraChannel,
-        agoraToken: data.agoraToken,
+        livekitRoom: data.livekitRoom,
+        livekitToken: data.livekitToken,
+        callId: data.callId,
       });
-      logger.info(`Call initiated: ${userId} -> ${data.receiverId}`);
+      logger.info(`Call initiated: ${userId} -> ${data.receiverId} (LiveKit room: ${data.livekitRoom})`);
     } else {
       socket.emit('call:error', { message: 'User is offline' });
     }
