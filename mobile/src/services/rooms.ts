@@ -16,7 +16,7 @@ export interface Room {
     displayName: string;
     avatarUrl: string | null;
   };
-  agoraChannelName: string | null;
+  livekitRoomName: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -123,9 +123,9 @@ class RoomsService {
     return response.data.data as RoomMember[];
   }
 
-  // Get Agora token for room
-  async getAgoraToken(roomId: string) {
-    const response = await api.get('/calls/agora-token', {
+  // Get LiveKit token for room
+  async getLivekitToken(roomId: string) {
+    const response = await api.get('/calls/livekit-token', {
       params: { roomId },
     });
     return response.data.data;

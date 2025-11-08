@@ -11,12 +11,8 @@ import {
 } from 'react-native-paper';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallsStore } from '../../src/stores/callsStore';
-import RtcEngine, {
-  ChannelProfileType,
-  ClientRoleType,
-  IRtcEngineEventHandler,
-  RtcSurfaceView,
-} from 'react-native-agora';
+import { useLiveKit } from '../../src/hooks/useLiveKit';
+import { VideoView } from '@livekit/react-native';
 import RateHostDialog from '../../src/components/RateHostDialog';
 
 const { width, height } = Dimensions.get('window');
@@ -25,8 +21,6 @@ export default function ActiveCallScreen() {
   const { callId } = useLocalSearchParams<{ callId: string }>();
   const theme = useTheme();
 
-  const [engine, setEngine] = useState<RtcEngine | null>(null);
-  const [remoteUid, setRemoteUid] = useState<number | null>(null);
   const [callTimer, setCallTimer] = useState(0);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const timerRef = useRef<NodeJS.Timeout>();
@@ -39,9 +33,27 @@ export default function ActiveCallScreen() {
     toggleMute,
     toggleSpeaker,
     toggleVideo,
-    endCall,
+    endCall: storeEndCall,
     setCallDuration,
   } = useCallsStore();
+
+  // LiveKit hook
+  const {
+    room,
+    isConnected,
+    localParticipant,
+    remoteParticipants,
+    isMicrophoneEnabled,
+    isCameraEnabled,
+    connect,
+    disconnect,
+    toggleMicrophone,
+    toggleCamera,
+    switchCamera,
+    error: livekitError,
+  } = useLiveKit({
+    autoConnect: false, // We'll connect manually
+  });
 
   useEffect(() => {
     if (!activeCall) {
@@ -49,7 +61,8 @@ export default function ActiveCallScreen() {
       return;
     }
 
-    initializeAgora();
+    // Connect to LiveKit room
+    initializeLiveKit();
     startTimer();
 
     return () => {
@@ -57,67 +70,20 @@ export default function ActiveCallScreen() {
     };
   }, [activeCall]);
 
-  const initializeAgora = async () => {
+  const initializeLiveKit = async () => {
+    if (!activeCall) return;
+
     try {
-      const appId = process.env.EXPO_PUBLIC_AGORA_APP_ID;
-      if (!appId) {
-        console.error('Agora App ID not found');
-        return;
-      }
-
-      // Create RTC engine
-      const agoraEngine = await RtcEngine.create(appId);
-
-      // Register event handlers
-      const eventHandler: IRtcEngineEventHandler = {
-        onUserJoined: (connection, uid) => {
-          console.log('Remote user joined:', uid);
-          setRemoteUid(uid);
+      await connect({
+        url: activeCall.serverUrl,
+        token: activeCall.token,
+        options: {
+          audio: true,
+          video: isVideoEnabled,
         },
-        onUserOffline: (connection, uid) => {
-          console.log('Remote user left:', uid);
-          setRemoteUid(null);
-        },
-        onJoinChannelSuccess: (connection, elapsed) => {
-          console.log('Successfully joined channel');
-        },
-        onError: (err, msg) => {
-          console.error('Agora error:', err, msg);
-        },
-      };
-
-      agoraEngine.registerEventHandler(eventHandler);
-
-      // Configure engine
-      await agoraEngine.setChannelProfile(
-        ChannelProfileType.ChannelProfileCommunication
-      );
-      await agoraEngine.setClientRole(ClientRoleType.ClientRoleBroadcaster);
-
-      // Enable audio
-      await agoraEngine.enableAudio();
-
-      // Enable video if video call
-      if (activeCall && isVideoEnabled) {
-        await agoraEngine.enableVideo();
-        await agoraEngine.startPreview();
-      }
-
-      // Join channel
-      if (activeCall) {
-        await agoraEngine.joinChannel(
-          activeCall.token,
-          activeCall.channel,
-          activeCall.uid,
-          {
-            clientRoleType: ClientRoleType.ClientRoleBroadcaster,
-          }
-        );
-      }
-
-      setEngine(agoraEngine);
+      });
     } catch (error) {
-      console.error('Failed to initialize Agora:', error);
+      console.error('Failed to connect to LiveKit:', error);
     }
   };
 
@@ -136,42 +102,32 @@ export default function ActiveCallScreen() {
       clearInterval(timerRef.current);
     }
 
-    if (engine) {
-      await engine.leaveChannel();
-      await engine.destroy();
-    }
+    await disconnect();
   };
 
   const handleToggleMute = async () => {
-    if (engine) {
-      await engine.muteLocalAudioStream(!isMuted);
-      toggleMute();
-    }
+    await toggleMicrophone();
+    toggleMute();
   };
 
-  const handleToggleSpeaker = async () => {
-    if (engine) {
-      await engine.setEnableSpeakerphone(!isSpeakerOn);
-      toggleSpeaker();
-    }
+  const handleToggleSpeaker = () => {
+    // Note: Speaker toggle is handled differently in React Native
+    // This is a placeholder - actual implementation depends on device audio routing
+    toggleSpeaker();
   };
 
   const handleToggleVideo = async () => {
-    if (engine) {
-      if (isVideoEnabled) {
-        await engine.muteLocalVideoStream(true);
-        await engine.stopPreview();
-      } else {
-        await engine.muteLocalVideoStream(false);
-        await engine.startPreview();
-      }
-      toggleVideo();
-    }
+    await toggleCamera();
+    toggleVideo();
+  };
+
+  const handleSwitchCamera = async () => {
+    await switchCamera();
   };
 
   const handleEndCall = async () => {
     await cleanup();
-    await endCall();
+    await storeEndCall();
 
     // Show rating dialog if the receiver was a host
     // TODO: Check if receiver (other user) is a host from activeCall data
@@ -200,22 +156,28 @@ export default function ActiveCallScreen() {
     return null;
   }
 
+  // Get the first remote participant
+  const remoteParticipant = remoteParticipants[0];
+
   return (
     <View style={styles.container}>
       {/* Video Views */}
-      {isVideoEnabled && remoteUid ? (
+      {isVideoEnabled && remoteParticipant ? (
         <>
           {/* Remote Video (Full Screen) */}
-          <RtcSurfaceView
-            canvas={{ uid: remoteUid }}
-            style={styles.remoteVideo}
-          />
+          <View style={styles.remoteVideo}>
+            <VideoView
+              style={styles.videoView}
+              videoTrack={remoteParticipant.videoTrackPublications[0]?.track}
+            />
+          </View>
 
           {/* Local Video (Picture-in-Picture) */}
           <Surface style={styles.localVideoContainer} elevation={4}>
-            <RtcSurfaceView
-              canvas={{ uid: 0 }}
+            <VideoView
               style={styles.localVideo}
+              videoTrack={localParticipant?.videoTrackPublications[0]?.track}
+              mirror={true}
             />
           </Surface>
         </>
@@ -231,7 +193,7 @@ export default function ActiveCallScreen() {
             User Name
           </Text>
           <Text variant="titleMedium" style={styles.callStatus}>
-            {remoteUid ? 'Connected' : 'Connecting...'}
+            {isConnected ? 'Connected' : 'Connecting...'}
           </Text>
         </View>
       )}
@@ -252,17 +214,17 @@ export default function ActiveCallScreen() {
           <View style={styles.controlsRow}>
             <View style={styles.controlItem}>
               <IconButton
-                icon={isMuted ? 'microphone-off' : 'microphone'}
+                icon={isMicrophoneEnabled ? 'microphone' : 'microphone-off'}
                 size={28}
                 iconColor="white"
                 style={[
                   styles.controlButton,
-                  isMuted && styles.controlButtonActive,
+                  !isMicrophoneEnabled && styles.controlButtonActive,
                 ]}
                 onPress={handleToggleMute}
               />
               <Text variant="bodySmall" style={styles.controlLabel}>
-                {isMuted ? 'Unmute' : 'Mute'}
+                {isMicrophoneEnabled ? 'Mute' : 'Unmute'}
               </Text>
             </View>
 
@@ -296,16 +258,16 @@ export default function ActiveCallScreen() {
             </View>
           </View>
 
-          {activeCall && isVideoEnabled && (
+          {isVideoEnabled && (
             <View style={styles.secondaryRow}>
               <View style={styles.controlItem}>
                 <IconButton
-                  icon={isVideoEnabled ? 'video' : 'video-off'}
+                  icon={isCameraEnabled ? 'video' : 'video-off'}
                   size={28}
                   iconColor="white"
                   style={[
                     styles.controlButton,
-                    !isVideoEnabled && styles.controlButtonActive,
+                    !isCameraEnabled && styles.controlButtonActive,
                   ]}
                   onPress={handleToggleVideo}
                 />
@@ -320,9 +282,7 @@ export default function ActiveCallScreen() {
                   size={28}
                   iconColor="white"
                   style={styles.controlButton}
-                  onPress={() => {
-                    engine?.switchCamera();
-                  }}
+                  onPress={handleSwitchCamera}
                 />
                 <Text variant="bodySmall" style={styles.controlLabel}>
                   Flip
@@ -355,6 +315,10 @@ const styles = StyleSheet.create({
   remoteVideo: {
     width: width,
     height: height,
+  },
+  videoView: {
+    width: '100%',
+    height: '100%',
   },
   localVideoContainer: {
     position: 'absolute',

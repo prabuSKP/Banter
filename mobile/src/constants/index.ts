@@ -16,8 +16,8 @@ export const ENV = {
   FIREBASE_MESSAGING_SENDER_ID: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   FIREBASE_APP_ID: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 
-  // Agora
-  AGORA_APP_ID: process.env.EXPO_PUBLIC_AGORA_APP_ID,
+  // LiveKit
+  LIVEKIT_SERVER_URL: process.env.EXPO_PUBLIC_LIVEKIT_SERVER_URL || 'wss://livekit.banter.app',
 
   // Razorpay
   RAZORPAY_KEY_ID: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID,
@@ -69,7 +69,7 @@ export const API_ENDPOINTS = {
   // Calls
   INITIATE_CALL: '/calls/initiate',
   GET_CALL_LOGS: '/calls/logs',
-  GET_AGORA_TOKEN: '/calls/agora-token',
+  GET_LIVEKIT_TOKEN: '/calls/livekit-token',
 
   // Payments
   CREATE_ORDER: '/payments/order',

@@ -44,7 +44,7 @@ export interface ChatRoom {
   description: string | null;
   isPublic: boolean;
   maxMembers: number;
-  agoraChannelName: string | null;
+  livekitRoomName: string | null;
   createdById: string;
   createdAt: string;
   members?: ChatRoomMember[];
@@ -69,7 +69,7 @@ export interface CallLog {
   callType: 'audio' | 'video';
   status: 'missed' | 'completed' | 'rejected';
   duration: number | null;
-  agoraChannelName: string;
+  livekitRoomName: string;
   createdAt: string;
   caller?: {
     id: string;
@@ -83,11 +83,14 @@ export interface CallLog {
   };
 }
 
-export interface AgoraToken {
+export interface LiveKitToken {
   token: string;
-  channel: string;
-  uid: number;
+  roomName: string;
+  identity: string;
+  serverUrl: string;
   expiresAt: number;
+  canPublish: boolean;
+  canSubscribe: boolean;
 }
 
 export interface ApiResponse<T = any> {

@@ -174,8 +174,9 @@ class SocketService {
   emitCallInitiate(data: {
     receiverId: string;
     callType: 'audio' | 'video';
-    agoraChannel: string;
-    agoraToken: string;
+    livekitRoom: string;
+    livekitToken: string;
+    callId: string;
   }) {
     this.socket?.emit(SOCKET_EVENTS.CALL_INITIATE, data);
   }

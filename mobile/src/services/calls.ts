@@ -33,16 +33,20 @@ export interface CallInitiateData {
 
 export interface CallData {
   callId: string;
-  channel: string;
+  roomName: string;
   token: string;
-  uid: number;
-  appId: string;
+  identity: string;
+  serverUrl: string;
 }
 
-export interface AgoraTokenData {
+export interface LiveKitTokenData {
   token: string;
-  uid: number;
-  channel: string;
+  roomName: string;
+  identity: string;
+  serverUrl: string;
+  expiresAt: number;
+  canPublish: boolean;
+  canSubscribe: boolean;
 }
 
 class CallsService {
@@ -76,9 +80,9 @@ class CallsService {
     };
   }
 
-  // Get Agora token for a room/channel
-  async getAgoraToken(roomId: string): Promise<AgoraTokenData> {
-    const response = await api.get(API_ENDPOINTS.GET_AGORA_TOKEN, {
+  // Get LiveKit token for a room/channel
+  async getLivekitToken(roomId: string): Promise<LiveKitTokenData> {
+    const response = await api.get(API_ENDPOINTS.GET_LIVEKIT_TOKEN, {
       params: { roomId },
     });
     return response.data.data;

@@ -47,7 +47,7 @@ export const API_ENDPOINTS = {
   UPDATE_CALL_STATUS: (id: string) => `/calls/${id}/status`,
   GET_CALL_LOGS: '/calls/logs',
   GET_CALL_STATS: '/calls/stats',
-  GET_AGORA_TOKEN: '/calls/agora-token',
+  GET_LIVEKIT_TOKEN: '/calls/livekit-token',
 
   // Rooms
   CREATE_ROOM: '/rooms',
@@ -269,7 +269,7 @@ export const SUBSCRIPTION_PRICING = {
 export const ENV = {
   API_URL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000',
   API_VERSION: process.env.EXPO_PUBLIC_API_VERSION || 'v1',
-  AGORA_APP_ID: process.env.EXPO_PUBLIC_AGORA_APP_ID || '',
+  LIVEKIT_SERVER_URL: process.env.EXPO_PUBLIC_LIVEKIT_SERVER_URL || 'wss://livekit.banter.app',
   FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '',
   FIREBASE_PROJECT_ID: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || '',
   RAZORPAY_KEY_ID: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || '',

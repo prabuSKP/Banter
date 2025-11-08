@@ -10,7 +10,7 @@ interface RoomsState {
   activeRoom: Room | null;
   roomMembers: RoomMember[];
   searchResults: Room[];
-  agoraToken: any | null;
+  livekitToken: any | null;
   isInRoom: boolean;
   isSpeaking: boolean;
   isMuted: boolean;
@@ -29,7 +29,7 @@ interface RoomsState {
   joinRoom: (roomId: string) => Promise<void>;
   leaveRoom: () => Promise<void>;
   fetchRoomMembers: (roomId: string) => Promise<void>;
-  getAgoraTokenForRoom: (roomId: string) => Promise<void>;
+  getLivekitTokenForRoom: (roomId: string) => Promise<void>;
   toggleMute: () => void;
   setSpeaking: (isSpeaking: boolean) => void;
   setUserSpeaking: (userId: string, isSpeaking: boolean) => void;
@@ -45,7 +45,7 @@ export const useRoomsStore = create<RoomsState>((set, get) => ({
   activeRoom: null,
   roomMembers: [],
   searchResults: [],
-  agoraToken: null,
+  livekitToken: null,
   isInRoom: false,
   isSpeaking: false,
   isMuted: false,
@@ -186,12 +186,12 @@ export const useRoomsStore = create<RoomsState>((set, get) => ({
       // Get room details
       const room = await roomsService.getRoomById(roomId);
 
-      // Get Agora token
-      const tokenData = await roomsService.getAgoraToken(roomId);
+      // Get LiveKit token
+      const tokenData = await roomsService.getLivekitToken(roomId);
 
       set({
         activeRoom: room,
-        agoraToken: tokenData,
+        livekitToken: tokenData,
         isInRoom: true,
         isLoading: false,
       });
@@ -230,7 +230,7 @@ export const useRoomsStore = create<RoomsState>((set, get) => ({
       set({
         activeRoom: null,
         roomMembers: [],
-        agoraToken: null,
+        livekitToken: null,
         isInRoom: false,
         isSpeaking: false,
         isMuted: false,
@@ -255,13 +255,13 @@ export const useRoomsStore = create<RoomsState>((set, get) => ({
     }
   },
 
-  getAgoraTokenForRoom: async (roomId: string) => {
+  getLivekitTokenForRoom: async (roomId: string) => {
     try {
-      const tokenData = await roomsService.getAgoraToken(roomId);
-      set({ agoraToken: tokenData });
+      const tokenData = await roomsService.getLivekitToken(roomId);
+      set({ livekitToken: tokenData });
     } catch (error: any) {
       set({
-        error: error.response?.data?.message || 'Failed to get Agora token',
+        error: error.response?.data?.message || 'Failed to get LiveKit token',
       });
       throw error;
     }

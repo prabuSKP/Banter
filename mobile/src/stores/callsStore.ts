@@ -14,9 +14,10 @@ export interface IncomingCall {
     avatar: string | null;
   };
   callType: 'audio' | 'video';
-  channel: string;
+  roomName: string;
   token: string;
-  uid: number;
+  identity: string;
+  serverUrl: string;
 }
 
 interface CallsState {
@@ -101,8 +102,9 @@ export const useCallsStore = create<CallsState>((set, get) => ({
         socketService.emitCallInitiate({
           receiverId,
           callType,
-          agoraChannel: callData.channel,
-          agoraToken: callData.token,
+          livekitRoom: callData.roomName,
+          livekitToken: callData.token,
+          callId: callData.callId,
         });
       }
 
@@ -123,10 +125,10 @@ export const useCallsStore = create<CallsState>((set, get) => ({
     set({
       activeCall: {
         callId: incomingCall.callId,
-        channel: incomingCall.channel,
+        roomName: incomingCall.roomName,
         token: incomingCall.token,
-        uid: incomingCall.uid,
-        appId: process.env.EXPO_PUBLIC_AGORA_APP_ID || '',
+        identity: incomingCall.identity,
+        serverUrl: incomingCall.serverUrl,
       },
       isInCall: true,
       incomingCall: null,
