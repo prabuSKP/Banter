@@ -129,7 +129,7 @@ model ChatRoom {
   isActive    Boolean  @default(true)
   isPublic    Boolean  @default(true)
   hostId      String
-  agoraChannel String? @unique // Agora channel name
+  livekitRoomName String? @unique // LiveKit room name
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -140,7 +140,7 @@ model ChatRoom {
 
   @@index([isActive, isPublic])
   @@index([category, language])
-  @@index([agoraChannel])
+  @@index([livekitRoomName])
 }
 
 model ChatRoomMember {
@@ -150,7 +150,6 @@ model ChatRoomMember {
   role        String   @default("member") // member, moderator, host
   isMuted     Boolean  @default(false)
   isSpeaking  Boolean  @default(false)
-  agoraUid    Int?     // Agora UID for this user in this room
   joinedAt    DateTime @default(now())
   leftAt      DateTime?
 
@@ -198,7 +197,7 @@ model CallLog {
   callType      String   // audio, video
   duration      Int?     // in seconds
   status        String   // initiated, ringing, answered, completed, missed, rejected, failed
-  agoraChannel  String?  // Agora channel name
+  livekitRoomName  String?  // LiveKit room name
   coinsCharged  Int?     // Coins charged for this call
   startedAt     DateTime @default(now())
   answeredAt    DateTime?
@@ -210,7 +209,7 @@ model CallLog {
   @@index([callerId])
   @@index([receiverId])
   @@index([startedAt])
-  @@index([agoraChannel])
+  @@index([livekitRoomName])
 }
 
 // ==================== PAYMENT & TRANSACTIONS ====================
