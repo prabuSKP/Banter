@@ -32,9 +32,10 @@ export const CALL = {
   MIN_DURATION_FOR_RATING: 30, // Minimum seconds to allow rating
 } as const;
 
-export const AGORA = {
+export const LIVEKIT = {
   DEFAULT_TOKEN_EXPIRY: 3600, // 1 hour in seconds
-  UID_MAX_VALUE: 2147483647, // Max int32 value for Agora UID
+  DEFAULT_ROOM_PREFIX: 'room_', // Room name prefix
+  DEFAULT_CALL_PREFIX: 'call_', // Call room prefix
 } as const;
 
 // ==================== ROOM SETTINGS ====================

@@ -4,6 +4,7 @@ import prisma from '../config/database';
 import { NotFoundError, BadRequestError, ForbiddenError } from '../utils/errors';
 import logger from '../config/logger';
 import env from '../config/env';
+import livekitService from './livekit.service';
 
 export class RoomService {
   // Create room
@@ -374,6 +375,55 @@ export class RoomService {
       return { message: 'Room deleted successfully' };
     } catch (error) {
       logger.error('Delete room error:', error);
+      throw error;
+    }
+  }
+
+  // Generate LiveKit token for room voice/video chat
+  async getRoomToken(roomId: string, userId: string, userName: string) {
+    try {
+      // Verify user is a member of the room
+      const membership = await prisma.chatRoomMember.findFirst({
+        where: {
+          roomId,
+          userId,
+        },
+        include: {
+          room: true,
+        },
+      });
+
+      if (!membership) {
+        throw new ForbiddenError('You must be a member to join room voice/video chat');
+      }
+
+      if (!membership.room) {
+        throw new NotFoundError('Room not found');
+      }
+
+      // Generate LiveKit room name if not already set
+      const livekitRoomName = membership.room.livekitRoomName || `room_${roomId}`;
+
+      // Update room with LiveKit room name if needed
+      if (!membership.room.livekitRoomName) {
+        await prisma.chatRoom.update({
+          where: { id: roomId },
+          data: { livekitRoomName },
+        });
+      }
+
+      // Generate token using LiveKit service
+      const tokenData = await livekitService.generateRoomToken(
+        userId,
+        roomId,
+        userName
+      );
+
+      logger.info(`LiveKit token generated for user ${userId} in room ${roomId}`);
+
+      return tokenData;
+    } catch (error) {
+      logger.error('Get room token error:', error);
       throw error;
     }
   }
