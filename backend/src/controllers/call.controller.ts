@@ -67,8 +67,8 @@ export class CallController {
     }
   }
 
-  // GET /api/v1/calls/agora-token
-  async getAgoraToken(req: AuthRequest, res: Response, next: NextFunction) {
+  // GET /api/v1/calls/livekit-token
+  async getLivekitToken(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
       const { roomId } = req.query as any;
@@ -80,7 +80,7 @@ export class CallController {
         });
       }
 
-      const tokenData = await callService.getAgoraTokenForRoom(userId, roomId);
+      const tokenData = await callService.getLivekitTokenForRoom(userId, roomId);
 
       res.status(200).json({
         success: true,

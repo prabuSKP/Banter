@@ -35,8 +35,8 @@ router.post(
 // GET /api/v1/calls/logs - Get call history
 router.get('/logs', callController.getCallLogs);
 
-// GET /api/v1/calls/agora-token - Get Agora token for room
-router.get('/agora-token', callController.getAgoraToken);
+// GET /api/v1/calls/livekit-token - Get LiveKit token for room
+router.get('/livekit-token', callController.getLivekitToken);
 
 // GET /api/v1/calls/stats - Get call statistics
 router.get('/stats', callController.getCallStats);
