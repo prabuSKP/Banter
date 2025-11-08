@@ -26,9 +26,15 @@ const envSchema = z.object({
   FIREBASE_PRIVATE_KEY: z.string(),
   FIREBASE_CLIENT_EMAIL: z.string(),
 
-  AGORA_APP_ID: z.string(),
-  AGORA_APP_CERTIFICATE: z.string(),
-  AGORA_TOKEN_EXPIRY: z.string().default('3600'),
+  LIVEKIT_API_KEY: z.string(),
+  LIVEKIT_API_SECRET: z.string(),
+  LIVEKIT_SERVER_URL: z.string().url(),
+  LIVEKIT_TOKEN_EXPIRY: z.string().default('3600'),
+
+  COTURN_HOST: z.string().optional(),
+  COTURN_PORT: z.string().optional(),
+  COTURN_TLS_PORT: z.string().optional(),
+  COTURN_SECRET: z.string().optional(),
 
   RAZORPAY_KEY_ID: z.string(),
   RAZORPAY_KEY_SECRET: z.string(),
