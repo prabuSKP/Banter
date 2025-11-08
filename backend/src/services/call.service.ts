@@ -3,8 +3,8 @@
 import prisma from '../config/database';
 import logger from '../config/logger';
 import { NotFoundError, BadRequestError } from '../utils/errors';
-import { PAGINATION, AGORA } from '../constants';
-import agoraService from './agora.service';
+import { PAGINATION } from '../constants';
+import livekitService from './livekit.service';
 import friendService from './friend.service';
 import walletService from './wallet.service';
 import hostService from './host.service';
@@ -19,10 +19,19 @@ export class CallService {
         throw new BadRequestError('Can only call friends');
       }
 
-      // 2. Verify receiver exists and is active
-      const receiver = await prisma.user.findUnique({
-        where: { id: receiverId, isActive: true },
-      });
+      // 2. Verify both users exist and are active
+      const [caller, receiver] = await Promise.all([
+        prisma.user.findUnique({
+          where: { id: callerId, isActive: true },
+        }),
+        prisma.user.findUnique({
+          where: { id: receiverId, isActive: true },
+        }),
+      ]);
+
+      if (!caller) {
+        throw new NotFoundError('Caller not found');
+      }
 
       if (!receiver) {
         throw new NotFoundError('User not found');
@@ -34,33 +43,31 @@ export class CallService {
         throw new BadRequestError('Cannot call this user');
       }
 
-      // 4. Generate unique channel name
-      const channelName = `call_${Date.now()}_${callerId.substring(0, 8)}`;
-
-      // 5. Generate Agora tokens for both users
-      const callerUid = this.generateUid(callerId);
-      const receiverUid = this.generateUid(receiverId);
-
-      const callerToken = agoraService.generateRtcToken(channelName, callerUid, 'publisher');
-      const receiverToken = agoraService.generateRtcToken(channelName, receiverUid, 'publisher');
-
-      // 6. Create call log in database
+      // 4. Create call log in database
       const callLog = await prisma.callLog.create({
         data: {
           callerId,
           receiverId,
           callType,
           status: 'initiated',
-          agoraChannelName: channelName,
-          agoraToken: callerToken.token,
+          // LiveKit room name will be set by generateCallToken
         },
       });
 
-      logger.info(`Call initiated: ${callerId} -> ${receiverId}, channel: ${channelName}, callId: ${callLog.id}`);
+      // 5. Generate LiveKit room name
+      const livekitRoomName = `call_${callLog.id}`;
+
+      // 6. Generate LiveKit tokens for both users
+      const [callerToken, receiverToken] = await Promise.all([
+        livekitService.generateCallToken(callLog.id, callerId, caller.displayName),
+        livekitService.generateCallToken(callLog.id, receiverId, receiver.displayName),
+      ]);
+
+      logger.info(`Call initiated: ${callerId} -> ${receiverId}, room: ${livekitRoomName}, callId: ${callLog.id}`);
 
       return {
         callId: callLog.id,
-        channelName,
+        roomName: livekitRoomName,
         callerToken,
         receiverToken,
         receiver: {
@@ -231,12 +238,21 @@ export class CallService {
     }
   }
 
-  // Get Agora token for an existing call or room
-  async getAgoraTokenForRoom(userId: string, roomId: string) {
+  // Get LiveKit token for an existing call or room
+  async getLivekitTokenForRoom(userId: string, roomId: string) {
     try {
-      return await agoraService.generateRoomToken(userId, roomId);
+      // Get user details for token generation
+      const user = await prisma.user.findUnique({
+        where: { id: userId, isActive: true },
+      });
+
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+
+      return await livekitService.generateRoomToken(userId, roomId, user.displayName);
     } catch (error) {
-      logger.error('Get Agora token for room error:', error);
+      logger.error('Get LiveKit token for room error:', error);
       throw error;
     }
   }
@@ -348,18 +364,6 @@ export class CallService {
       logger.error('Update user call stats error:', error);
       // Don't throw - this is not critical
     }
-  }
-
-  // Private helper: Generate deterministic UID from user ID
-  private generateUid(userId: string): number {
-    // Simple hash function to convert UUID to number
-    let hash = 0;
-    for (let i = 0; i < userId.length; i++) {
-      const char = userId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return Math.abs(hash) % AGORA.UID_MAX_VALUE; // Ensure positive and within int32 range
   }
 }
 
