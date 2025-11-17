@@ -353,3 +353,123 @@ metrics:
     - "Mobile app performance"
     - "Database query performance"
     - "Real-time communication quality"
+
+# CRITICAL: Code Quality & Functionality Preservation Rules
+quality_enforcement:
+
+  # Rule 1: NO BREAKING CHANGES
+  breaking_changes_prevention:
+    - "NEVER remove existing API endpoints without deprecation period"
+    - "NEVER change database schema without migration scripts"
+    - "NEVER modify existing function signatures without versioning"
+    - "NEVER remove features that are currently in use"
+    - "ALWAYS maintain backward compatibility"
+    - "ALWAYS provide migration paths for breaking changes"
+
+  # Rule 2: MANDATORY TESTING
+  testing_requirements:
+    - "NEVER commit code without running existing tests"
+    - "ALWAYS write tests for new features"
+    - "ALWAYS verify tests pass before pushing code"
+    - "NEVER skip test failures - fix them immediately"
+    - "ALWAYS test edge cases and error scenarios"
+    - "ALWAYS perform manual testing for UI changes"
+
+  # Rule 3: FUNCTIONALITY PRESERVATION
+  regression_prevention:
+    - "ALWAYS verify existing features still work after changes"
+    - "NEVER delete code without understanding its purpose"
+    - "ALWAYS check for dependencies before modifying code"
+    - "NEVER assume unused code can be safely removed"
+    - "ALWAYS test integration points after changes"
+    - "ALWAYS verify WebRTC calls still work after RTC changes"
+    - "ALWAYS verify authentication flows after auth changes"
+    - "ALWAYS verify payments work after payment changes"
+
+  # Rule 4: CODE QUALITY STANDARDS
+  production_code_requirements:
+    - "ALWAYS use TypeScript strict mode"
+    - "ALWAYS handle errors comprehensively"
+    - "ALWAYS add proper logging for debugging"
+    - "ALWAYS validate user inputs"
+    - "ALWAYS sanitize data to prevent injection"
+    - "ALWAYS use proper async/await error handling"
+    - "NEVER commit commented-out code blocks"
+    - "NEVER commit console.log in production code"
+    - "NEVER hard-code sensitive credentials"
+
+  # Rule 5: DOCUMENTATION REQUIREMENTS
+  documentation_standards:
+    - "ALWAYS update documentation when changing APIs"
+    - "ALWAYS document complex business logic"
+    - "ALWAYS add JSDoc comments for public functions"
+    - "ALWAYS update README when adding new features"
+    - "ALWAYS document breaking changes in CHANGELOG"
+
+  # Rule 6: SECURITY REQUIREMENTS
+  security_standards:
+    - "ALWAYS validate and sanitize user inputs"
+    - "ALWAYS use parameterized queries (Prisma handles this)"
+    - "ALWAYS implement rate limiting for sensitive endpoints"
+    - "ALWAYS use HTTPS for external API calls"
+    - "NEVER expose sensitive data in error messages"
+    - "NEVER store passwords in plain text"
+    - "ALWAYS use environment variables for secrets"
+
+  # Rule 7: PERFORMANCE REQUIREMENTS
+  performance_standards:
+    - "ALWAYS optimize database queries (use indexes)"
+    - "ALWAYS implement pagination for large datasets"
+    - "ALWAYS cache frequently accessed data"
+    - "NEVER perform N+1 queries"
+    - "ALWAYS clean up resources (connections, timers, listeners)"
+    - "ALWAYS optimize images before upload"
+
+  # Rule 8: MOBILE-SPECIFIC REQUIREMENTS
+  mobile_quality_standards:
+    - "ALWAYS test on both iOS and Android"
+    - "ALWAYS handle network failures gracefully"
+    - "ALWAYS implement offline support where needed"
+    - "ALWAYS optimize for battery usage"
+    - "NEVER block the UI thread"
+    - "ALWAYS clean up listeners in useEffect cleanup"
+    - "ALWAYS use React.memo for expensive components"
+
+  # Rule 9: PRE-COMMIT CHECKLIST
+  pre_commit_verification:
+    - "✓ All tests pass (npm test)"
+    - "✓ No TypeScript errors (npm run build)"
+    - "✓ Code formatted (npm run format)"
+    - "✓ No console.log or debugging code"
+    - "✓ Functionality manually tested"
+    - "✓ No breaking changes introduced"
+    - "✓ Documentation updated if needed"
+    - "✓ Error handling implemented"
+    - "✓ Security considerations reviewed"
+
+  # Rule 10: LIVEKIT-SPECIFIC REQUIREMENTS
+  livekit_preservation:
+    - "NEVER revert to Agora.io code"
+    - "ALWAYS use LiveKit SDK for voice/video"
+    - "ALWAYS use COTURN for TURN/STUN"
+    - "ALWAYS test calls end-to-end after changes"
+    - "NEVER break call initiation flow"
+    - "NEVER break call acceptance/rejection"
+    - "ALWAYS verify audio/video tracks work"
+    - "ALWAYS test reconnection scenarios"
+
+# Enforcement Protocol
+enforcement:
+  violation_handling:
+    - "STOP immediately if breaking change detected"
+    - "REVERT changes that break functionality"
+    - "FIX test failures before proceeding"
+    - "CONSULT orchestrator for major architectural changes"
+    - "REQUEST user approval for breaking changes"
+
+  code_review_requirements:
+    - "All subagents must follow quality_enforcement rules"
+    - "Orchestrator reviews all major changes"
+    - "Testing specialist verifies all tests pass"
+    - "Security specialist reviews security-sensitive changes"
+    - "No code is pushed without meeting quality standards"

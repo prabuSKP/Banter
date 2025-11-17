@@ -79,7 +79,10 @@ communication_flows:
       2. "Validate architectural compliance"
       3. "Ensure proper testing coverage"
       4. "Verify documentation completeness"
-      5. "Approve or request modifications"
+      5. "Check quality_enforcement rules compliance (see subagents.yaml)"
+      6. "Run automated tests and verify pass"
+      7. "Verify no breaking changes introduced"
+      8. "Approve or request modifications"
 
 # Agent Coordination Rules
 coordination_matrix:
@@ -148,7 +151,7 @@ monitoring_metrics:
 risk_assessment:
 
   technical_risks:
-    - "Third-party service dependencies (Firebase, Agora, Razorpay)"
+    - "Third-party service dependencies (Firebase, LiveKit, Razorpay)"
     - "Scalability and performance bottlenecks"
     - "Security vulnerabilities and data protection"
     - "Mobile platform compatibility issues"
@@ -272,3 +275,195 @@ phases:
       - "System uptime > 99.9%"
       - "User growth targets met"
       - "Cost per user within budget"
+# CRITICAL: Quality Enforcement & Functionality Preservation
+quality_enforcement_protocol:
+
+  # All subagents MUST follow quality_enforcement rules in subagents.yaml
+  mandatory_compliance:
+    - "Reference: .claude/subagents.yaml#quality_enforcement"
+    - "All 10 quality rules are non-negotiable"
+    - "Orchestrator enforces compliance on every commit"
+    - "Violations result in immediate code rejection"
+
+  # Pre-Commit Quality Gates
+  quality_gates:
+    gate_1_tests:
+      requirement: "All tests MUST pass"
+      verification: "Run 'npm test' in backend and mobile"
+      failure_action: "STOP - Fix tests before proceeding"
+
+    gate_2_typescript:
+      requirement: "No TypeScript errors"
+      verification: "Run 'npm run build' successfully"
+      failure_action: "STOP - Fix type errors before proceeding"
+
+    gate_3_functionality:
+      requirement: "No breaking changes"
+      verification: "Manual verification of core features"
+      critical_features:
+        - "Authentication (phone OTP login)"
+        - "Voice calls (LiveKit)"
+        - "Video calls (LiveKit)"
+        - "Real-time messaging (Socket.IO)"
+        - "Payment processing (Razorpay)"
+        - "Friend system"
+      failure_action: "STOP - Revert breaking changes"
+
+    gate_4_security:
+      requirement: "Security standards met"
+      verification: "Security specialist review"
+      checks:
+        - "Input validation implemented"
+        - "No SQL injection vulnerabilities"
+        - "No XSS vulnerabilities"
+        - "Secrets in environment variables"
+        - "Rate limiting on sensitive endpoints"
+      failure_action: "STOP - Fix security issues"
+
+    gate_5_performance:
+      requirement: "Performance standards met"
+      verification: "Performance testing"
+      checks:
+        - "API response time < 200ms"
+        - "No N+1 queries"
+        - "Database queries optimized"
+        - "Images optimized"
+        - "Memory leaks prevented"
+      failure_action: "WARNING - Optimize before production"
+
+  # Functionality Preservation Protocol
+  functionality_preservation:
+    critical_features_never_break:
+      authentication:
+        - "Phone OTP login must work"
+        - "JWT token generation must work"
+        - "Token refresh must work"
+        - "Logout must work"
+
+      voice_video_calls:
+        - "LiveKit call initiation must work"
+        - "Call acceptance must work"
+        - "Call rejection must work"
+        - "Audio tracks must connect"
+        - "Video tracks must connect"
+        - "Camera switching must work"
+        - "Microphone mute must work"
+
+      messaging:
+        - "Real-time message delivery must work"
+        - "Message persistence must work"
+        - "Typing indicators must work"
+        - "Read receipts must work"
+
+      payments:
+        - "Razorpay order creation must work"
+        - "Payment verification must work"
+        - "Wallet balance updates must work"
+        - "Transaction history must work"
+
+    verification_protocol:
+      before_commit:
+        1. "Run automated tests"
+        2. "Manually test changed functionality"
+        3. "Manually test dependent functionality"
+        4. "Verify no regressions in critical features"
+        5. "Get orchestrator approval"
+
+      regression_testing:
+        - "Test authentication flow end-to-end"
+        - "Test voice call flow end-to-end"
+        - "Test video call flow end-to-end"
+        - "Test messaging flow"
+        - "Test payment flow"
+
+  # Code Review Requirements
+  mandatory_reviews:
+    all_changes:
+      - "Self-review by implementing agent"
+      - "Automated test verification"
+      - "Orchestrator review for quality compliance"
+
+    critical_changes:
+      require: "Multiple specialist reviews"
+      categories:
+        authentication: ["auth-security-specialist", "backend-developer"]
+        rtc_changes: ["rtc-specialist", "backend-developer", "mobile-developer"]
+        database_schema: ["database-specialist", "backend-developer"]
+        payment_logic: ["payment-specialist", "backend-developer"]
+        security_fixes: ["auth-security-specialist", "backend-developer"]
+
+    breaking_changes:
+      require: "User approval + full team review"
+      process:
+        1. "Document breaking change rationale"
+        2. "Provide migration path"
+        3. "Get user approval"
+        4. "Update all documentation"
+        5. "Notify all affected parties"
+
+  # LiveKit Migration Protection
+  livekit_protection:
+    never_revert:
+      - "NEVER use Agora.io SDK"
+      - "NEVER reference agora-access-token package"
+      - "NEVER use Agora channel/token terminology"
+      - "ALWAYS use LiveKit SDK"
+      - "ALWAYS use LiveKit room/token terminology"
+      - "ALWAYS use COTURN for TURN/STUN"
+
+    verification:
+      - "Grep codebase for 'agora' references before commit"
+      - "Verify LiveKit imports present"
+      - "Test voice/video calls work"
+      - "Verify no Agora packages in package.json"
+
+# Enforcement Actions
+enforcement_actions:
+
+  test_failure:
+    action: "IMMEDIATE STOP"
+    protocol:
+      1. "Identify failing tests"
+      2. "Fix root cause"
+      3. "Verify all tests pass"
+      4. "Re-run quality gates"
+
+  breaking_change_detected:
+    action: "IMMEDIATE REVERT"
+    protocol:
+      1. "Revert offending commit"
+      2. "Analyze what broke"
+      3. "Design non-breaking solution"
+      4. "Get approval before re-implementing"
+
+  security_vulnerability:
+    action: "CRITICAL PRIORITY FIX"
+    protocol:
+      1. "Alert security specialist"
+      2. "Assess severity"
+      3. "Implement patch immediately"
+      4. "Deploy hotfix"
+      5. "Document incident"
+
+  quality_violation:
+    action: "REJECT CODE"
+    protocol:
+      1. "Identify specific violation"
+      2. "Provide feedback to agent"
+      3. "Require fixes before approval"
+      4. "Re-review after fixes"
+
+# Continuous Improvement
+continuous_improvement:
+  learning_from_issues:
+    - "Document all bugs and root causes"
+    - "Update quality rules based on issues"
+    - "Share learnings across all agents"
+    - "Prevent recurrence through process updates"
+
+  quality_metrics_tracking:
+    - "Test coverage percentage"
+    - "Bug count per release"
+    - "Performance benchmarks"
+    - "User satisfaction scores"
+    - "Code review feedback trends"
