@@ -16,8 +16,18 @@ const paymentVerifySchema = z.object({
   razorpaySignature: z.string(),
 });
 
-// POST /api/v1/payments/webhook - Razorpay webhook (no auth)
-router.post('/webhook', paymentController.handleWebhook);
+// Webhook payload schema (basic validation)
+const webhookSchema = z.object({
+  event: z.string().min(1, 'Event type is required'),
+  payload: z.object({}).passthrough(), // Allow any payload structure, validated by Razorpay signature
+});
+
+// POST /api/v1/payments/webhook - Razorpay webhook (no auth, signature verified in service)
+router.post(
+  '/webhook',
+  validateBody(webhookSchema),
+  paymentController.handleWebhook
+);
 
 // All other payment routes require authentication
 router.use(authenticate);
