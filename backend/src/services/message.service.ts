@@ -263,16 +263,22 @@ export class MessageService {
         }
       }
 
-      // Get unread counts
+      // Get unread counts in a single query (optimized - was N+1)
+      const partnerIds = Array.from(conversationsMap.keys());
+      const unreadCounts = await prisma.message.groupBy({
+        by: ['senderId'],
+        where: {
+          receiverId: userId,
+          isRead: false,
+          senderId: { in: partnerIds },
+        },
+        _count: { id: true },
+      });
+
+      // Map results back to conversations
+      const unreadMap = new Map(unreadCounts.map(u => [u.senderId, u._count.id]));
       for (const [partnerId, conversation] of conversationsMap.entries()) {
-        const unreadCount = await prisma.message.count({
-          where: {
-            senderId: partnerId,
-            receiverId: userId,
-            isRead: false,
-          },
-        });
-        conversation.unreadCount = unreadCount;
+        conversation.unreadCount = unreadMap.get(partnerId) || 0;
       }
 
       const conversations = Array.from(conversationsMap.values())

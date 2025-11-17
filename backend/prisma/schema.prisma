@@ -81,6 +81,11 @@ model User {
   @@index([firebaseUid])
   @@index([username])
   @@index([isOnline])
+  @@index([email])
+  @@index([isHost])
+  @@index([role])
+  @@index([isActive, role])
+  @@index([isPremium])
 }
 
 // ==================== FRIENDSHIP SYSTEM ====================
@@ -99,6 +104,8 @@ model FriendRequest {
 
   @@unique([senderId, receiverId])
   @@index([receiverId, status])
+  @@index([senderId])
+  @@index([senderId, status])
 }
 
 model Friendship {
@@ -158,6 +165,9 @@ model ChatRoomMember {
 
   @@unique([userId, roomId])
   @@index([roomId])
+  @@index([userId])
+  @@index([userId, leftAt])
+  @@index([leftAt])
 }
 
 // ==================== MESSAGING ====================
@@ -186,6 +196,10 @@ model Message {
   @@index([senderId, receiverId])
   @@index([roomId, createdAt])
   @@index([receiverId, isRead])
+  @@index([senderId])
+  @@index([replyToId])
+  @@index([senderId, isRead])
+  @@index([createdAt])
 }
 
 // ==================== VOICE/VIDEO CALLS ====================
@@ -210,6 +224,10 @@ model CallLog {
   @@index([receiverId])
   @@index([startedAt])
   @@index([livekitRoomName])
+  @@index([receiverId, status])
+  @@index([callerId, status])
+  @@index([status])
+  @@index([callerId, receiverId])
 }
 
 // ==================== PAYMENT & TRANSACTIONS ====================
@@ -236,6 +254,11 @@ model Transaction {
   @@index([userId])
   @@index([razorpayOrderId])
   @@index([razorpayPaymentId])
+  @@index([userId, type])
+  @@index([userId, status])
+  @@index([status])
+  @@index([createdAt])
+  @@index([type])
 }
 
 model Subscription {
@@ -271,6 +294,8 @@ model BlockedUser {
 
   @@unique([userId, blockedUserId])
   @@index([userId])
+  @@index([blockedUserId])
+  @@index([userId, blockedUserId])
 }
 
 model Report {
