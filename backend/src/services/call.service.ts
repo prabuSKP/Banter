@@ -217,7 +217,7 @@ export class CallService {
       });
 
       // Transform calls to include call direction
-      const transformedCalls = calls.map(call => ({
+      const transformedCalls = calls.map((call: typeof calls[number]) => ({
         ...call,
         direction: call.callerId === userId ? 'outgoing' : 'incoming',
         peer: call.callerId === userId ? call.receiver : call.caller,

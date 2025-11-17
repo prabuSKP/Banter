@@ -15,7 +15,7 @@
  * @see https://docs.livekit.io/
  */
 
-import { AccessToken, RoomServiceClient } from '@livekit/server-sdk';
+import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 import env from '../config/env';
 import logger from '../config/logger';
 import prisma from '../config/database';

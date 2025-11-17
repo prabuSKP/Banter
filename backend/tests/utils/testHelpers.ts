@@ -53,8 +53,8 @@ export const mockDecodedFirebaseToken = {
   exp: Math.floor(Date.now() / 1000) + 3600,
 };
 
-// Mock Agora token
-export const mockAgoraToken = 'mock-agora-rtc-token';
+// Mock LiveKit token
+export const mockLiveKitToken = 'mock-livekit-rtc-token';
 
 // Mock Razorpay order
 export const mockRazorpayOrder = {

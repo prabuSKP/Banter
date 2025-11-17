@@ -17,15 +17,15 @@ export interface TokenPair {
 // Generate access token
 export const generateAccessToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, env.JWT_SECRET, {
-    expiresIn: env.JWT_EXPIRES_IN,
-  });
+    expiresIn: env.JWT_EXPIRES_IN as string | number,
+  } as jwt.SignOptions);
 };
 
 // Generate refresh token
 export const generateRefreshToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
-    expiresIn: env.JWT_REFRESH_EXPIRES_IN,
-  });
+    expiresIn: env.JWT_REFRESH_EXPIRES_IN as string | number,
+  } as jwt.SignOptions);
 };
 
 // Generate both tokens

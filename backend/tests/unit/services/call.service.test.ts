@@ -2,13 +2,13 @@
 
 import callService from '../../../src/services/call.service';
 import prisma from '../../../src/config/database';
-import agoraService from '../../../src/services/agora.service';
+import livekitService from '../../../src/services/livekit.service';
 import friendService from '../../../src/services/friend.service';
 import walletService from '../../../src/services/wallet.service';
 import hostService from '../../../src/services/host.service';
 
 jest.mock('../../../src/config/database');
-jest.mock('../../../src/services/agora.service');
+jest.mock('../../../src/services/livekit.service');
 jest.mock('../../../src/services/friend.service');
 jest.mock('../../../src/services/wallet.service');
 jest.mock('../../../src/services/host.service');
@@ -38,13 +38,15 @@ describe('CallService Unit Tests', () => {
       // Mock no blocking
       (prisma.blockedUser.findFirst as jest.Mock).mockResolvedValue(null);
 
-      // Mock Agora token generation
-      (agoraService.generateRtcToken as jest.Mock).mockReturnValue({
-        token: 'test-token',
-        channel: 'test-channel',
-        uid: 12345,
-        expiresAt: Date.now() + 3600,
-        appId: 'test-app-id',
+      // Mock LiveKit token generation
+      (livekitService.generateCallToken as jest.Mock).mockResolvedValue({
+        token: 'test-livekit-token',
+        roomName: 'call_call-789',
+        identity: callerId,
+        expiresAt: Math.floor(Date.now() / 1000) + 3600,
+        serverUrl: 'wss://test.livekit.cloud',
+        canPublish: true,
+        canSubscribe: true,
       });
 
       // Mock call log creation
@@ -54,15 +56,16 @@ describe('CallService Unit Tests', () => {
         receiverId,
         callType: 'video',
         status: 'initiated',
-        agoraChannelName: 'test-channel',
+        livekitRoom: 'call_call-789',
       });
 
       const result = await callService.initiateCall(callerId, receiverId, 'video');
 
       expect(result).toHaveProperty('callId');
-      expect(result).toHaveProperty('channelName');
+      expect(result).toHaveProperty('roomName');
       expect(result).toHaveProperty('callerToken');
       expect(result).toHaveProperty('receiverToken');
+      expect(result).toHaveProperty('serverUrl');
       expect(friendService.areFriends).toHaveBeenCalledWith(callerId, receiverId);
       expect(prisma.callLog.create).toHaveBeenCalled();
     });

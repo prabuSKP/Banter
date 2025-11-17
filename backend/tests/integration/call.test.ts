@@ -4,7 +4,7 @@ import request from 'supertest';
 import app from '../../src/app';
 import { generateTestToken } from '../utils/testHelpers';
 import prisma from '../../src/config/database';
-import agoraService from '../../src/services/agora.service';
+import livekitService from '../../src/services/livekit.service';
 import friendService from '../../src/services/friend.service';
 
 describe('Call API Integration Tests', () => {
@@ -40,18 +40,19 @@ describe('Call API Integration Tests', () => {
         receiverId,
         callType: 'video',
         status: 'initiated',
-        agoraChannelName: 'test-channel',
-        agoraToken: 'test-token',
+        livekitRoom: 'call_test-call-id',
         createdAt: new Date(),
       } as any);
 
-      // Mock Agora token generation
-      jest.spyOn(agoraService, 'generateRtcToken').mockReturnValue({
-        token: 'test-agora-token',
-        channel: 'test-channel',
-        uid: 12345,
-        expiresAt: Date.now() + 3600,
-        appId: 'test-app-id',
+      // Mock LiveKit token generation
+      jest.spyOn(livekitService, 'generateCallToken').mockResolvedValue({
+        token: 'test-livekit-token',
+        roomName: 'call_test-call-id',
+        identity: 'test-user-id',
+        expiresAt: Math.floor(Date.now() / 1000) + 3600,
+        serverUrl: 'wss://test.livekit.cloud',
+        canPublish: true,
+        canSubscribe: true,
       });
 
       const response = await request(app)
@@ -65,9 +66,10 @@ describe('Call API Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('callId');
-      expect(response.body.data).toHaveProperty('channelName');
+      expect(response.body.data).toHaveProperty('roomName');
       expect(response.body.data).toHaveProperty('callerToken');
       expect(response.body.data).toHaveProperty('receiverToken');
+      expect(response.body.data).toHaveProperty('serverUrl');
     });
 
     it('should fail if users are not friends', async () => {
@@ -268,15 +270,17 @@ describe('Call API Integration Tests', () => {
       jest.spyOn(prisma.chatRoom, 'findUnique').mockResolvedValue({
         id: roomId,
         name: 'Test Room',
-        agoraChannelName: 'test-channel',
+        livekitRoomName: 'room_test-room-id',
       } as any);
 
-      jest.spyOn(agoraService, 'generateRtcToken').mockReturnValue({
-        token: 'test-token',
-        channel: 'test-channel',
-        uid: 12345,
-        expiresAt: Date.now() + 3600,
-        appId: 'test-app-id',
+      jest.spyOn(livekitService, 'generateRoomToken').mockResolvedValue({
+        token: 'test-livekit-token',
+        roomName: 'room_test-room-id',
+        identity: 'test-user-id',
+        expiresAt: Math.floor(Date.now() / 1000) + 3600,
+        serverUrl: 'wss://test.livekit.cloud',
+        canPublish: true,
+        canSubscribe: true,
       });
 
       const response = await request(app)
