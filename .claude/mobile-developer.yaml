@@ -93,14 +93,11 @@ primary_files:
     - "mobile/src/components/**/*.tsx"
 
   services_hooks:
-    - "mobile/services/**/*.ts"
-    - "mobile/hooks/**/*.ts"
     - "mobile/src/services/**/*.ts"
     - "mobile/src/hooks/**/*.ts"
 
   state_management:
-    - "mobile/store/**/*.ts"
-    - "mobile/src/store/**/*.ts"
+    - "mobile/src/stores/**/*.ts"
 
   testing:
     - "mobile/tests/**/*.{ts,tsx}"

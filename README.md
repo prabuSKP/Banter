@@ -7,7 +7,7 @@ A modern social networking application for real-time voice, video, and text comm
 - 🔐 **Phone Authentication** - Secure OTP login via Firebase
 - 👥 **Friends System** - Send and manage friend requests
 - 💬 **Real-time Messaging** - Text, images, audio, video, GIFs
-- 📞 **Voice & Video Calls** - HD quality with Agora.io
+- 📞 **Voice & Video Calls** - HD quality with LiveKit + COTURN
 - 🎤 **Voice Chat Rooms** - Public and private group rooms
 - 💰 **In-app Payments** - Razorpay for coins and premium
 - 🔔 **Push Notifications** - Firebase Cloud Messaging
@@ -39,17 +39,18 @@ npm start
 - [REQUIREMENTS.md](REQUIREMENTS.md) - Complete development specification
 - [backend/README.md](backend/README.md) - Backend API documentation
 - [mobile/README.md](mobile/README.md) - Mobile app setup guide
-- [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md) - Progress tracking
+- [MOBILE_MIGRATION_COMPLETE.md](MOBILE_MIGRATION_COMPLETE.md) - Migration status
+- [BACKEND_VERIFICATION.md](BACKEND_VERIFICATION.md) - Backend verification report
 - [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) - Architecture overview
 - [TESTING_GUIDE.md](TESTING_GUIDE.md) - Testing documentation
 
 ## 📊 Progress
 
-**Overall: ~47% Complete**
+**Overall: ~90% Complete**
 
-✅ Backend (60%) - Core infrastructure, Auth, Users, Friends, Messages, Calls
-✅ Mobile (35%) - Setup, Navigation, Auth, Services
-🚧 In Progress - Chat rooms, File upload, UI screens
+✅ Backend (100%) - Complete LiveKit migration, all APIs implemented
+✅ Mobile (100%) - Complete LiveKit migration, core services implemented
+🚧 In Progress - Additional UI screens, testing
 
 ## 🧪 Testing
 

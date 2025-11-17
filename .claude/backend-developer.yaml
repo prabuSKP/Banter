@@ -119,7 +119,7 @@ tasks:
   core_responsibilities:
     - "Implement and maintain RESTful API endpoints"
     - "Design and optimize database schemas"
-    - "Integrate third-party services (Firebase, Agora, Razorpay)"
+    - "Integrate third-party services (Firebase, LiveKit, Razorpay)"
     - "Implement real-time features with Socket.IO"
     - "Ensure API security and authentication"
     - "Write comprehensive tests for backend functionality"

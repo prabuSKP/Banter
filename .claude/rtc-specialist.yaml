@@ -78,10 +78,10 @@ primary_files:
     - "backend/src/config/coturn.ts"
 
   frontend_rtc:
-    - "mobile/hooks/useLiveKit.ts"
-    - "mobile/components/call/**/*.tsx"
-    - "mobile/app/call/**/*.tsx"
-    - "mobile/services/livekit.ts"
+    - "mobile/src/hooks/useLiveKit.ts"
+    - "mobile/src/components/call/**/*.tsx"
+    - "mobile/app/calls/**/*.tsx"
+    - "mobile/src/services/livekit.ts"
 
   socket_implementation:
     - "backend/src/socket/index.ts"
