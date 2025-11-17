@@ -1,24 +1,24 @@
 // backend/src/routes/wallet.routes.ts
 
 import { Router } from 'express';
+import { z } from 'zod';
 import walletController from '../controllers/wallet.controller';
 import { authenticate } from '../middleware/auth';
-import { validateBody } from '../middleware/validation';
-import { z } from 'zod';
+import { validateBody, validateQuery } from '../middleware/validation';
+import { paginationSchema } from '../utils/validators';
 
 const router = Router();
 
 // All wallet routes require authentication
 router.use(authenticate);
 
-// Transfer coins schema
+// Validation schemas
 const transferCoinsSchema = z.object({
   toUserId: z.string().uuid('Invalid user ID'),
   amount: z.number().int().positive('Amount must be positive'),
   message: z.string().max(200).optional(),
 });
 
-// Charge call schema
 const chargeCallSchema = z.object({
   callId: z.string().uuid('Invalid call ID'),
   callType: z.enum(['audio', 'video']),
@@ -29,7 +29,11 @@ const chargeCallSchema = z.object({
 router.get('/balance', walletController.getBalance);
 
 // GET /api/v1/wallet/transactions - Get transaction history
-router.get('/transactions', walletController.getTransactionHistory);
+router.get(
+  '/transactions',
+  validateQuery(paginationSchema),
+  walletController.getTransactionHistory
+);
 
 // GET /api/v1/wallet/packages - Get recharge packages
 router.get('/packages', walletController.getRechargePackages);
