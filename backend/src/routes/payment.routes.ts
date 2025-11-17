@@ -1,11 +1,11 @@
 // backend/src/routes/payment.routes.ts
 
 import { Router } from 'express';
+import { z } from 'zod';
 import paymentController from '../controllers/payment.controller';
 import { authenticate } from '../middleware/auth';
-import { validateBody } from '../middleware/validation';
-import { paymentCreateSchema } from '../utils/validators';
-import { z } from 'zod';
+import { validateBody, validateQuery } from '../middleware/validation';
+import { paymentCreateSchema, paginationSchema } from '../utils/validators';
 
 const router = Router();
 
@@ -47,7 +47,11 @@ router.post(
 );
 
 // GET /api/v1/payments/transactions - Get transaction history
-router.get('/transactions', paymentController.getTransactions);
+router.get(
+  '/transactions',
+  validateQuery(paginationSchema),
+  paymentController.getTransactions
+);
 
 // GET /api/v1/payments/subscription - Get active subscription
 router.get('/subscription', paymentController.getSubscription);

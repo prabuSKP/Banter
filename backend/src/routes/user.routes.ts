@@ -1,27 +1,30 @@
 // backend/src/routes/user.routes.ts
 
 import { Router } from 'express';
+import { z } from 'zod';
 import userController from '../controllers/user.controller';
 import { authenticate } from '../middleware/auth';
-import { validateBody, validateQuery } from '../middleware/validation';
-import { z } from 'zod';
-import { userUpdateSchema } from '../utils/validators';
+import { validateBody, validateParams, validateQuery } from '../middleware/validation';
+import { userUpdateSchema, paginationSchema } from '../utils/validators';
 
 const router = Router();
 
 // All user routes require authentication
 router.use(authenticate);
 
-// Avatar update schema
+// Validation schemas
 const avatarSchema = z.object({
   avatarUrl: z.string().url('Invalid avatar URL'),
 });
 
-// Search query schema
 const searchSchema = z.object({
   q: z.string().min(1, 'Search query is required'),
   page: z.string().optional(),
   limit: z.string().optional(),
+});
+
+const userIdParamSchema = z.object({
+  id: z.string().uuid('Invalid user ID'),
 });
 
 // GET /api/v1/users/me - Get current user profile
@@ -37,15 +40,31 @@ router.post('/me/avatar', validateBody(avatarSchema), userController.updateAvata
 router.get('/search', validateQuery(searchSchema), userController.searchUsers);
 
 // GET /api/v1/users/blocked - Get blocked users
-router.get('/blocked', userController.getBlockedUsers);
+router.get(
+  '/blocked',
+  validateQuery(paginationSchema),
+  userController.getBlockedUsers
+);
 
 // GET /api/v1/users/:id - Get user by ID
-router.get('/:id', userController.getUserById);
+router.get(
+  '/:id',
+  validateParams(userIdParamSchema),
+  userController.getUserById
+);
 
 // POST /api/v1/users/:id/block - Block user
-router.post('/:id/block', userController.blockUser);
+router.post(
+  '/:id/block',
+  validateParams(userIdParamSchema),
+  userController.blockUser
+);
 
 // DELETE /api/v1/users/:id/block - Unblock user
-router.delete('/:id/block', userController.unblockUser);
+router.delete(
+  '/:id/block',
+  validateParams(userIdParamSchema),
+  userController.unblockUser
+);
 
 export default router;
